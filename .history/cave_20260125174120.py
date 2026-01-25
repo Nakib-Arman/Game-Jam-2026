@@ -5,24 +5,13 @@ WALL = 1
 FLOOR = 0
 EXIT = 2
 
-TOP_BORDER = 3
-BOTTOM_BORDER = 3
-LEFT_BORDER = 5
-RIGHT_BORDER = 5
-
 
 def generate_cave(rows, cols,
-                  room_attempts=40,
+                  room_attempts=40,  # increased to add more rooms
                   min_room_size=3,
                   max_room_size=6):
 
     cave = [[WALL for _ in range(cols)] for _ in range(rows)]
-
-    # Compute valid carving area
-    min_x = LEFT_BORDER
-    max_x = cols - RIGHT_BORDER - 1
-    min_y = TOP_BORDER
-    max_y = rows - BOTTOM_BORDER - 1
 
     # ----------------------
     # Maze generation (DFS)
@@ -30,23 +19,20 @@ def generate_cave(rows, cols,
     def carve_maze(x, y):
         directions = [(2, 0), (-2, 0), (0, 2), (0, -2)]
         random.shuffle(directions)
-
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
-            if min_x <= nx <= max_x and min_y <= ny <= max_y:
+            if 1 <= nx < cols - 1 and 1 <= ny < rows - 1:
                 if cave[ny][nx] == WALL:
                     cave[y + dy // 2][x + dx // 2] = FLOOR
                     cave[ny][nx] = FLOOR
                     carve_maze(nx, ny)
 
-    # Start maze safely inside borders
-    start_x = min_x | 1   # ensure odd
-    start_y = min_y | 1
+    start_x, start_y = 1, 1
     cave[start_y][start_x] = FLOOR
     carve_maze(start_x, start_y)
 
     # ----------------------
-    # Room helpers
+    # Helper functions for rooms
     # ----------------------
     rooms = []
 
@@ -70,17 +56,16 @@ def generate_cave(rows, cols,
         return (x + w // 2, y + h // 2)
 
     # ----------------------
-    # Carve rooms (inside borders)
+    # Carve more rooms
     # ----------------------
     for _ in range(room_attempts):
         w = random.randint(min_room_size, max_room_size)
         h = random.randint(min_room_size, max_room_size)
-
-        x = random.randint(min_x, max_x - w)
-        y = random.randint(min_y, max_y - h)
+        x = random.randint(1, cols - w - 2)
+        y = random.randint(1, rows - h - 2)
 
         new_room = (x, y, w, h)
-
+        # allow rooms to overlap maze corridors slightly
         if any(intersects(new_room, r) for r in rooms):
             continue
 
@@ -117,5 +102,8 @@ def find_farthest_cell(cave, start_x, start_y):
                     dist[ny][nx] = dist[y][x] + 1
                     queue.append((nx, ny))
                     farthest = (nx, ny)
-
     return farthest
+
+
+
+

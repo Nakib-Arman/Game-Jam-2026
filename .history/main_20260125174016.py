@@ -6,14 +6,14 @@ from map import draw_map
 # CONFIGURATION
 # ======================
 
-WORLD_ROWS = 46
-WORLD_COLS = 50
+WORLD_ROWS = 40
+WORLD_COLS = 40
 
 VIEW_ROWS = 7
 VIEW_COLS = 11
 
 BASE_CELL_SIZE = 128
-WALL_SCALE = 1
+WALL_SCALE = 0.5
 
 MOVE_DELAY = 80
 FPS = 60
@@ -43,7 +43,7 @@ font = pygame.font.SysFont(None, 24)
 
 cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS)
 for rows in cave:
-    print(rows)
+    
 player_radius = BASE_CELL_SIZE // 4
 last_move_time = 0
 show_map = False
