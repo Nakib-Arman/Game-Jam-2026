@@ -31,7 +31,7 @@ WALL_SCALE = 1
 FPS = 60
 
 BLACK = (0, 0, 0)
-LIGHT_GRAY = (100, 100, 100)
+LIGHT_GRAY =  (98, 87, 85)
 DARK_GRAY = (55, 55, 55)
 GREEN = (0, 200, 0)
 RED = (220, 60, 60)
@@ -64,6 +64,10 @@ ENERGY_DRAIN_PER_SEC = 0.6
 # ======================
 
 pygame.init()
+
+wall_image = pygame.image.load("assets/wall_block.png")
+wall_image = pygame.transform.scale(wall_image, (BASE_CELL_SIZE, BASE_CELL_SIZE))
+
 SCREEN_WIDTH = VIEW_COLS * BASE_CELL_SIZE
 SCREEN_HEIGHT = VIEW_ROWS * BASE_CELL_SIZE
 
@@ -71,6 +75,40 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Cave Explorer")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 24)
+
+# ======================
+# LOAD CHARACTER SPRITES
+# ======================
+
+character_sheet = pygame.image.load("assets/chars.jpg")
+
+SPRITE_WIDTH = 177.5
+SPRITE_HEIGHT = 205.5
+FRAMES_PER_ANIMATION = 4
+
+def extract_frames(sheet, row):
+    """Extract all 4 frames from a specific row"""
+    frames = []
+    for col in range(FRAMES_PER_ANIMATION):
+        # Extract the frame from sprite sheet
+        frame = sheet.subsurface(pygame.Rect(
+            col * SPRITE_WIDTH, 
+            row * SPRITE_HEIGHT, 
+            SPRITE_WIDTH, 
+            SPRITE_HEIGHT
+        ))
+        # Scale to match your player size (half of cell size)
+        scaled = pygame.transform.scale(frame, (BASE_CELL_SIZE // 2, BASE_CELL_SIZE // 2))
+        frames.append(scaled)
+    return frames
+
+# Load all direction animations
+sprites = {
+    "down": extract_frames(character_sheet, 0),   # Row 0
+    "left": extract_frames(character_sheet, 1),   # Row 1  
+    "right": extract_frames(character_sheet, 2),  # Row 2
+    "up": extract_frames(character_sheet, 3)      # Row 3
+}
 
 # ======================
 # GAME STATE
@@ -88,6 +126,12 @@ player_radius = BASE_CELL_SIZE // 4
 show_map = False
 light_percentage = MAX_LIGHT
 energy_percentage = MAX_ENERGY
+
+# Animation state
+player_direction = "down"      # Current facing direction
+animation_frame = 0            # Current frame (0-3)
+animation_timer = 0            # Time accumulator for frame switching
+ANIMATION_SPEED = 0.15         # Seconds per frame
 
 # ======================
 # HELPERS
@@ -159,7 +203,7 @@ def draw_world():
                 size = int(BASE_CELL_SIZE * WALL_SCALE)
                 offset = (BASE_CELL_SIZE - size) // 2
                 rect = pygame.Rect(screen_x + offset, screen_y + offset, size, size)
-                pygame.draw.rect(screen, DARK_GRAY, rect)
+                screen.blit(wall_image, rect.topleft)
             else:
                 rect = pygame.Rect(screen_x, screen_y, BASE_CELL_SIZE, BASE_CELL_SIZE)
                 pygame.draw.rect(screen, LIGHT_GRAY, rect)
@@ -175,7 +219,11 @@ def draw_world():
     # Player
     screen_center_x = player_x - cam_x
     screen_center_y = player_y - cam_y
-    pygame.draw.circle(screen, RED, (int(screen_center_x), int(screen_center_y)), player_radius)
+    
+    # Draw animated sprite
+    current_sprite = sprites[player_direction][animation_frame]
+    sprite_rect = current_sprite.get_rect(center=(int(screen_center_x), int(screen_center_y)))
+    screen.blit(current_sprite, sprite_rect)
 
 # ------------------
 # LIGHT RENDERING
@@ -252,14 +300,25 @@ while running:
         current_speed = MIN_MOVE_SPEED + (MAX_MOVE_SPEED - MIN_MOVE_SPEED) * (energy_percentage / 100)
 
         dx = dy = 0
+        is_moving = False
+        
+        # Check keys and set direction
         if keys[pygame.K_LEFT]:
             dx = -current_speed * dt
-        if keys[pygame.K_RIGHT]:
+            player_direction = "left"
+            is_moving = True
+        elif keys[pygame.K_RIGHT]:
             dx = current_speed * dt
-        if keys[pygame.K_UP]:
+            player_direction = "right"
+            is_moving = True
+        elif keys[pygame.K_UP]:
             dy = -current_speed * dt
-        if keys[pygame.K_DOWN]:
+            player_direction = "up"
+            is_moving = True
+        elif keys[pygame.K_DOWN]:
             dy = current_speed * dt
+            player_direction = "down"
+            is_moving = True
 
         # Move horizontally
         if can_move_pixel(player_x + dx, player_y):
@@ -267,6 +326,15 @@ while running:
         # Move vertically
         if can_move_pixel(player_x, player_y + dy):
             player_y += dy
+
+        # Animate sprite
+        if is_moving:
+            animation_timer += dt
+            if animation_timer >= ANIMATION_SPEED:
+                animation_timer = 0
+                animation_frame = (animation_frame + 1) % FRAMES_PER_ANIMATION
+        else:
+            animation_frame = 0  # Idle = first frame
 
         # Light & energy drain
         light_percentage = max(MIN_LIGHT, light_percentage - LIGHT_DRAIN_PER_SEC * dt)

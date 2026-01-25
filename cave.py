@@ -24,23 +24,33 @@ def generate_cave(rows, cols,
     max_y = rows - BOTTOM_BORDER - 1
 
     # ----------------------
-    # Maze generation
+    # Maze generation (iterative)
     # ----------------------
-    def carve_maze(x, y):
+    start_x = min_x | 1
+    start_y = min_y | 1
+    cave[start_y][start_x] = FLOOR
+    
+    stack = [(start_x, start_y)]
+    
+    while stack:
+        x, y = stack[-1]
+        
         directions = [(2, 0), (-2, 0), (0, 2), (0, -2)]
         random.shuffle(directions)
+        
+        found = False
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
             if min_x <= nx <= max_x and min_y <= ny <= max_y:
                 if cave[ny][nx] == WALL:
                     cave[y + dy // 2][x + dx // 2] = FLOOR
                     cave[ny][nx] = FLOOR
-                    carve_maze(nx, ny)
-
-    start_x = min_x | 1
-    start_y = min_y | 1
-    cave[start_y][start_x] = FLOOR
-    carve_maze(start_x, start_y)
+                    stack.append((nx, ny))
+                    found = True
+                    break
+        
+        if not found:
+            stack.pop()
 
     # ----------------------
     # Rooms
