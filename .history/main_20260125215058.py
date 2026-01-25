@@ -2,21 +2,12 @@ import pygame
 from cave import generate_cave
 from map import draw_map
 
+# ======================
+# CONFIGURATION
+# ======================
 
-LEVEL = "easy"
-
-if(LEVEL == "easy"):
-    WORLD_ROWS = 46
-    WORLD_COLS = 50
-elif(LEVEL == "medium"):
-    WORLD_ROWS = 66
-    WORLD_COLS = 70
-elif(LEVEL == "hard"):
-    WORLD_ROWS = 86
-    WORLD_COLS = 90
-DENSITY = 0.3
-MAX_ROOM_SIZE = 10
-MIN_ROOM_SIZE = 3
+WORLD_ROWS = 86
+WORLD_COLS = 90
 
 VIEW_ROWS = 7
 VIEW_COLS = 11
@@ -50,21 +41,12 @@ font = pygame.font.SysFont(None, 24)
 # GAME STATE
 # ======================
 
-cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS,DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE)
+cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS, row)
 for rows in cave:
     print(rows)
 player_radius = BASE_CELL_SIZE // 4
 last_move_time = 0
 show_map = False
-
-# ======================
-# LIGHT STATE
-# ======================
-
-MAX_LIGHT = 100
-MIN_LIGHT = 0  # fully dark if desired
-light_percentage = MAX_LIGHT
-LIGHT_DRAIN_PER_SEC = 0.5  # faster for visible shrinking
 
 # ======================
 # HELPERS
@@ -159,53 +141,13 @@ def draw_world():
         player_radius
     )
 
-# ------------------
-# LIGHT RENDERING
-# ------------------
-
-def draw_light_overlay():
-    # Create dark overlay
-    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 220))
-
-    # Max radius = screen height / 2
-    max_radius = SCREEN_HEIGHT // 2
-    radius = int(max_radius * (light_percentage / 100))
-
-    pygame.draw.circle(
-        overlay,
-        (0, 0, 0, 0),  # transparent
-        (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
-        radius
-    )
-
-    screen.blit(overlay, (0, 0))
-
-def draw_light_ui():
-    bar_width = 200
-    bar_height = 20
-    x = 10
-    y = SCREEN_HEIGHT - 40
-
-    # Background
-    pygame.draw.rect(screen, (50, 50, 50), (x, y, bar_width, bar_height))
-    pygame.draw.rect(screen, (200, 200, 200), (x, y, bar_width, bar_height), 2)
-
-    # Fill
-    fill_width = int(bar_width * (light_percentage / 100))
-    pygame.draw.rect(screen, (240, 240, 100), (x, y, fill_width, bar_height))
-
-    # Text
-    text = font.render(f"Light: {int(light_percentage)}%", True, (255, 255, 255))
-    screen.blit(text, (x, y - 20))
-
 # ======================
 # MAIN LOOP
 # ======================
 
 running = True
 while running:
-    dt = clock.get_time() / 1000  # seconds since last frame
+    clock.tick(FPS)
     current_time = pygame.time.get_ticks()
 
     for event in pygame.event.get():
@@ -245,13 +187,6 @@ while running:
             last_move_time = current_time
 
     # ------------------
-    # LIGHT DRAIN
-    # ------------------
-    if not show_map:
-        light_percentage -= LIGHT_DRAIN_PER_SEC * dt
-        light_percentage = max(MIN_LIGHT, light_percentage)
-
-    # ------------------
     # DRAW
     # ------------------
     screen.fill(BLACK)
@@ -265,11 +200,8 @@ while running:
         )
     else:
         draw_world()
-        draw_light_overlay()  # light circle shrinks with time
-        draw_light_ui()       # light percentage bar
 
     map_button = draw_map_button()
     pygame.display.flip()
-    clock.tick(FPS)
 
 pygame.quit()

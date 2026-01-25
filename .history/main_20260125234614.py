@@ -15,8 +15,7 @@ elif(LEVEL == "hard"):
     WORLD_ROWS = 86
     WORLD_COLS = 90
 DENSITY = 0.3
-MAX_ROOM_SIZE = 10
-MIN_ROOM_SIZE = 3
+MAX_ROOM_SIZE 
 
 VIEW_ROWS = 7
 VIEW_COLS = 11
@@ -50,7 +49,7 @@ font = pygame.font.SysFont(None, 24)
 # GAME STATE
 # ======================
 
-cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS,DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE)
+cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS,room_density=0.3,min_room_size=6,max_room_size=10)
 for rows in cave:
     print(rows)
 player_radius = BASE_CELL_SIZE // 4

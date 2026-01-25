@@ -2,21 +2,12 @@ import pygame
 from cave import generate_cave
 from map import draw_map
 
+# ======================
+# CONFIGURATION
+# ======================
 
-LEVEL = "easy"
-
-if(LEVEL == "easy"):
-    WORLD_ROWS = 46
-    WORLD_COLS = 50
-elif(LEVEL == "medium"):
-    WORLD_ROWS = 66
-    WORLD_COLS = 70
-elif(LEVEL == "hard"):
-    WORLD_ROWS = 86
-    WORLD_COLS = 90
-DENSITY = 0.3
-MAX_ROOM_SIZE = 10
-MIN_ROOM_SIZE = 3
+WORLD_ROWS = 46
+WORLD_COLS = 50
 
 VIEW_ROWS = 7
 VIEW_COLS = 11
@@ -50,7 +41,7 @@ font = pygame.font.SysFont(None, 24)
 # GAME STATE
 # ======================
 
-cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS,DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE)
+cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS)
 for rows in cave:
     print(rows)
 player_radius = BASE_CELL_SIZE // 4
@@ -64,7 +55,7 @@ show_map = False
 MAX_LIGHT = 100
 MIN_LIGHT = 0  # fully dark if desired
 light_percentage = MAX_LIGHT
-LIGHT_DRAIN_PER_SEC = 0.5  # faster for visible shrinking
+LIGHT_DRAIN_PER_SEC = 1  # faster for visible shrinking
 
 # ======================
 # HELPERS
@@ -164,22 +155,34 @@ def draw_world():
 # ------------------
 
 def draw_light_overlay():
-    # Create dark overlay
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 220))
+    overlay.fill((0, 0, 0, 220))  # base darkness
 
     # Max radius = screen height / 2
     max_radius = SCREEN_HEIGHT // 2
     radius = int(max_radius * (light_percentage / 100))
 
+    # Soft edge: draw multiple circles with decreasing alpha
+    edge_width = 30  # width of the shaded border
+    for i in range(edge_width):
+        alpha = int(220 * (i / edge_width))  # gradient from 0 to 220
+        pygame.draw.circle(
+            overlay,
+            (0, 0, 0, alpha),
+            (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
+            radius + i
+        )
+
+    # Transparent center
     pygame.draw.circle(
         overlay,
-        (0, 0, 0, 0),  # transparent
+        (0, 0, 0, 0),
         (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
         radius
     )
 
     screen.blit(overlay, (0, 0))
+
 
 def draw_light_ui():
     bar_width = 200

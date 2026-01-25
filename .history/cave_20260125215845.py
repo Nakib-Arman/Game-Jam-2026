@@ -12,23 +12,25 @@ RIGHT_BORDER = 5
 
 
 def generate_cave(rows, cols,
-                  room_density=0.015,   # ← KEY CHANGE
-                  min_room_size=3,
+                  room_attempts,
+                  min_room_size=6,
                   max_room_size=6):
 
     cave = [[WALL for _ in range(cols)] for _ in range(rows)]
 
+    # Compute valid carving area
     min_x = LEFT_BORDER
     max_x = cols - RIGHT_BORDER - 1
     min_y = TOP_BORDER
     max_y = rows - BOTTOM_BORDER - 1
 
     # ----------------------
-    # Maze generation
+    # Maze generation (DFS)
     # ----------------------
     def carve_maze(x, y):
         directions = [(2, 0), (-2, 0), (0, 2), (0, -2)]
         random.shuffle(directions)
+
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
             if min_x <= nx <= max_x and min_y <= ny <= max_y:
@@ -37,13 +39,14 @@ def generate_cave(rows, cols,
                     cave[ny][nx] = FLOOR
                     carve_maze(nx, ny)
 
-    start_x = min_x | 1
+    # Start maze safely inside borders
+    start_x = min_x | 1   # ensure odd
     start_y = min_y | 1
     cave[start_y][start_x] = FLOOR
     carve_maze(start_x, start_y)
 
     # ----------------------
-    # Rooms
+    # Room helpers
     # ----------------------
     rooms = []
 
@@ -66,9 +69,9 @@ def generate_cave(rows, cols,
         x, y, w, h = room
         return (x + w // 2, y + h // 2)
 
-    # Scale room attempts with area
-    room_attempts = int(rows * cols * room_density)
-
+    # ----------------------
+    # Carve rooms (inside borders)
+    # ----------------------
     for _ in range(room_attempts):
         w = random.randint(min_room_size, max_room_size)
         h = random.randint(min_room_size, max_room_size)

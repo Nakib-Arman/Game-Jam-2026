@@ -50,7 +50,7 @@ font = pygame.font.SysFont(None, 24)
 # GAME STATE
 # ======================
 
-cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS,DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE)
+cave, (player_x, player_y) = generate_cave(WORLD_ROWS, WORLD_COLS,room_density=0.3,min_room_size=6,max_room_size=10)
 for rows in cave:
     print(rows)
 player_radius = BASE_CELL_SIZE // 4
