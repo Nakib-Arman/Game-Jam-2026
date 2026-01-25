@@ -40,8 +40,8 @@ RED = (220, 60, 60)
 # MOVEMENT SETTINGS
 # ======================
 
-MAX_MOVE_SPEED = 500  # pixels/sec when energy is full
-MIN_MOVE_SPEED = 0    # pixels/sec when energy is empty
+MAX_MOVE_SPEED = 200  # pixels/sec when energy is full
+MIN_MOVE_SPEED = 50   # pixels/sec when energy is empty
 
 # ======================
 # LIGHT SETTINGS
@@ -237,10 +237,6 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
             show_map = not show_map
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                if map_button.collidepoint(event.pos):
-                    show_map = not show_map
 
     # ------------------
     # PIXEL MOVEMENT

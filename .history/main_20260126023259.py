@@ -40,7 +40,7 @@ RED = (220, 60, 60)
 # MOVEMENT SETTINGS
 # ======================
 
-MAX_MOVE_SPEED = 500  # pixels/sec when energy is full
+MAX_MOVE_SPEED = 200  # pixels/sec when energy is full
 MIN_MOVE_SPEED = 0    # pixels/sec when energy is empty
 
 # ======================
