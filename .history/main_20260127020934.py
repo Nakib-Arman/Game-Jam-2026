@@ -523,6 +523,9 @@ while running:
                 if show_map:
                     # Always allow closing the map
                     show_map = False
+                elif map_count > 0:
+                    show_map = True
+                    map_count -= 1
 
                     # Toggle gates randomly when map is viewed
                     exit_cell = None
@@ -541,10 +544,6 @@ while running:
                             exit_cell,
                             open_ratio=0.5  # half open, half closed
                         )
-                        
-                elif map_count > 0:
-                    show_map = True
-                    map_count -= 1
 
 
             # Toggle map with mouse button
@@ -553,7 +552,6 @@ while running:
                     if show_map:
                         # Always allow closing
                         show_map = False
-
                         # Toggle gates randomly when map is viewed
                         exit_cell = None
                         for y in range(WORLD_ROWS):

@@ -523,6 +523,9 @@ while running:
                 if show_map:
                     # Always allow closing the map
                     show_map = False
+                elif map_count > 0:
+                    show_map = True
+                    map_count -= 1
 
                     # Toggle gates randomly when map is viewed
                     exit_cell = None
@@ -541,10 +544,6 @@ while running:
                             exit_cell,
                             open_ratio=0.5  # half open, half closed
                         )
-                        
-                elif map_count > 0:
-                    show_map = True
-                    map_count -= 1
 
 
             # Toggle map with mouse button
@@ -553,6 +552,10 @@ while running:
                     if show_map:
                         # Always allow closing
                         show_map = False
+                    elif map_count > 0:
+                        # Only open if player has a map
+                        show_map = True
+                        map_count -= 1
 
                         # Toggle gates randomly when map is viewed
                         exit_cell = None
@@ -573,11 +576,6 @@ while running:
                                 exit_cell,
                                 open_ratio=0.5  # half open, half closed
                             )
-                    elif map_count > 0:
-                        # Only open if player has a map
-                        show_map = True
-                        map_count -= 1
-
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
 
@@ -651,7 +649,7 @@ while running:
             elif item == FOOD:
                 energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
             elif item == MAP:
-                map_count += 10  # Player can now open the map once
+                map_count += 1  # Player can now open the map once
                 
 
         # Drawing

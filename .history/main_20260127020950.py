@@ -541,7 +541,6 @@ while running:
                             exit_cell,
                             open_ratio=0.5  # half open, half closed
                         )
-                        
                 elif map_count > 0:
                     show_map = True
                     map_count -= 1

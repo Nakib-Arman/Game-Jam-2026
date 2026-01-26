@@ -523,25 +523,7 @@ while running:
                 if show_map:
                     # Always allow closing the map
                     show_map = False
-
-                    # Toggle gates randomly when map is viewed
-                    exit_cell = None
-                    for y in range(WORLD_ROWS):
-                        for x in range(WORLD_COLS):
-                            if cave[y][x] == EXIT:
-                                exit_cell = (x, y)
-                                break
-                        if exit_cell:
-                            break
-
-                    if exit_cell:
-                        rearrange_gates(
-                            cave,
-                            (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                            exit_cell,
-                            open_ratio=0.5  # half open, half closed
-                        )
-                        
+                    
                 elif map_count > 0:
                     show_map = True
                     map_count -= 1
