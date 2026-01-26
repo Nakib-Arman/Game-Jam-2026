@@ -149,6 +149,9 @@ food_image = pygame.transform.scale(food_image, (BASE_CELL_SIZE // 2, BASE_CELL_
 light_image = pygame.image.load("assets/light.jpg")
 light_image = pygame.transform.scale(light_image, (BASE_CELL_SIZE // 2, BASE_CELL_SIZE // 2))
 
+finish_image = pygame.image.load("assets/finish.jpg")
+finish_image = pygame.transform.scale(finish_image, (BASE_CELL_SIZE, BASE_CELL_SIZE))
+
 # ======================
 # GAME STATE
 # ======================
@@ -259,8 +262,7 @@ def draw_world():
             if tile == WALL:
                 screen.blit(wall_image, (sx, sy))
             elif tile==EXIT:
-                pygame.draw.rect(screen, GREEN,
-                                 (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+                screen.blit(finish_image, (sx, sy))
             else:
                 pygame.draw.rect(screen, LIGHT_GRAY,
                                  (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
