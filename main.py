@@ -184,6 +184,13 @@ gate_open_v = pygame.transform.scale(gate_open_v, (BASE_CELL_SIZE, BASE_CELL_SIZ
 finish_image = pygame.image.load("assets/finish.jpg")
 finish_image = pygame.transform.scale(finish_image, (BASE_CELL_SIZE, BASE_CELL_SIZE))
 
+# Monsters
+MONSTER_SIZE = BASE_CELL_SIZE // 2
+monster_left = pygame.image.load("assets/monleft.jpg")
+monster_left = pygame.transform.scale(monster_left, (MONSTER_SIZE, MONSTER_SIZE))
+monster_right = pygame.image.load("assets/monright.jpg")
+monster_right = pygame.transform.scale(monster_right, (MONSTER_SIZE, MONSTER_SIZE))
+
 # ======================
 # GAME STATE
 # ======================
@@ -343,7 +350,9 @@ def draw_world():
     screen.blit(sprite, sprite.get_rect(center=(player_x - cam_x, player_y - cam_y)))
     # Draw enemies
     for enemy in enemies:
-        pygame.draw.circle(screen, (255, 0, 0), (int(enemy["x"] - cam_x), int(enemy["y"] - cam_y)), BASE_CELL_SIZE // 3)
+        sprite = monster_right if enemy.get("dir") == "right" else monster_left
+        rect = sprite.get_rect(center=(int(enemy["x"] - cam_x), int(enemy["y"] - cam_y)))
+        screen.blit(sprite, rect)
 
 
 # ======================
@@ -564,7 +573,8 @@ def start_new_game():
             floor_cells.remove((ex, ey))
             enemies.append({
                 "x": ex * BASE_CELL_SIZE + BASE_CELL_SIZE // 2,
-                "y": ey * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
+                "y": ey * BASE_CELL_SIZE + BASE_CELL_SIZE // 2,
+                "dir": "right"
             })
 
     player_x = cx * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
@@ -827,6 +837,12 @@ while running:
                     move_dist = ENEMY_SPEED * dt
                     step_x = dx / dist * move_dist
                     step_y = dy / dist * move_dist
+
+                    # Update facing direction by horizontal intent
+                    if step_x > 0:
+                        enemy["dir"] = "right"
+                    elif step_x < 0:
+                        enemy["dir"] = "left"
 
                     # Move separately in x and y, checking collisions
                     if can_move_pixel(enemy["x"] + step_x, enemy["y"]):
