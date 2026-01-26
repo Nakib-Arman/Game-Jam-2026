@@ -128,6 +128,19 @@ sprites = {
 }
 
 # ======================
+# ITEM IMAGES
+# ======================
+
+map_image = pygame.image.load("assets/map.jpg")
+map_image = pygame.transform.scale(map_image, (BASE_CELL_SIZE // 2, BASE_CELL_SIZE // 2))
+
+food_image = pygame.image.load("assets/food.jpg")
+food_image = pygame.transform.scale(food_image, (BASE_CELL_SIZE // 2, BASE_CELL_SIZE // 2))
+
+light_image = pygame.image.load("assets/light.jpg")
+light_image = pygame.transform.scale(light_image, (BASE_CELL_SIZE // 2, BASE_CELL_SIZE // 2))
+
+# ======================
 # GAME STATE
 # ======================
 
@@ -236,6 +249,9 @@ def draw_world():
             # Draw walls
             if tile == WALL:
                 screen.blit(wall_image, (sx, sy))
+            elif tile==EXIT:
+                pygame.draw.rect(screen, GREEN,
+                                 (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
             else:
                 pygame.draw.rect(screen, LIGHT_GRAY,
                                  (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
@@ -245,16 +261,15 @@ def draw_world():
             circle_center = (sx + BASE_CELL_SIZE // 2, sy + BASE_CELL_SIZE // 2)
 
             if tile in (MAP, FOOD, LIGHT):
-                # Dark brown background
-                pygame.draw.circle(screen, (60, 35, 20), circle_center, circle_radius)
-
-                # Item colors
                 if tile == MAP:
-                    pygame.draw.circle(screen, (0, 150, 255), circle_center, circle_radius)
+                    item_rect = map_image.get_rect(center=circle_center)
+                    screen.blit(map_image, item_rect)
                 elif tile == FOOD:
-                    pygame.draw.circle(screen, (255, 100, 0), circle_center, circle_radius)
+                    item_rect = food_image.get_rect(center=circle_center)
+                    screen.blit(food_image, item_rect)
                 elif tile == LIGHT:
-                    pygame.draw.circle(screen, (255, 255, 50), circle_center, circle_radius)
+                    item_rect = light_image.get_rect(center=circle_center)
+                    screen.blit(light_image, item_rect)
 
     # Draw player sprite
     sprite = sprites[player_direction][animation_frame]
