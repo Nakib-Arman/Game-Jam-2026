@@ -155,6 +155,20 @@ food_image = pygame.transform.scale(food_image, (BASE_CELL_SIZE // 2, BASE_CELL_
 light_image = pygame.image.load("assets/light.jpg")
 light_image = pygame.transform.scale(light_image, (BASE_CELL_SIZE // 2, BASE_CELL_SIZE // 2))
 
+# Gates
+gate_closed_h = pygame.image.load("assets/doors/closed_horizontal.jpg")
+gate_closed_h = pygame.transform.scale(gate_closed_h, (BASE_CELL_SIZE, BASE_CELL_SIZE))
+gate_closed_v = pygame.image.load("assets/doors/closed_vertical.jpg")
+gate_closed_v = pygame.transform.scale(gate_closed_v, (BASE_CELL_SIZE, BASE_CELL_SIZE))
+
+gate_open_h = pygame.image.load("assets/doors/open_horizontal.jpg")
+gate_open_h = pygame.transform.scale(gate_open_h, (BASE_CELL_SIZE, BASE_CELL_SIZE))
+gate_open_v = pygame.image.load("assets/doors/open_vertical.jpg")
+gate_open_v = pygame.transform.scale(gate_open_v, (BASE_CELL_SIZE, BASE_CELL_SIZE))
+
+finish_image = pygame.image.load("assets/finish.jpg")
+finish_image = pygame.transform.scale(finish_image, (BASE_CELL_SIZE, BASE_CELL_SIZE))
+
 # ======================
 # GAME STATE
 # ======================
@@ -261,16 +275,26 @@ def draw_world():
 
             tile = cave[wy][wx]
 
-            # Draw walls
+            # Draw walls and gates
             if tile == WALL:
                 screen.blit(wall_image, (sx, sy))
-            elif tile == GATE_CLOSED:
-                pygame.draw.rect(screen, (200, 0, 0), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))  # red for closed gate
-            elif tile == GATE_OPEN:
-                pygame.draw.rect(screen, (0, 200, 0), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))  # green for open gate
+            elif tile in (GATE_CLOSED, GATE_OPEN):
+                # Decide orientation from surrounding walls
+                left_wall = (wx > 0 and cave[wy][wx-1] == WALL)
+                right_wall = (wx < WORLD_COLS-1 and cave[wy][wx+1] == WALL)
+                up_wall = (wy > 0 and cave[wy-1][wx] == WALL)
+                down_wall = (wy < WORLD_ROWS-1 and cave[wy+1][wx] == WALL)
+
+                horizontal = up_wall and down_wall   # corridor is horizontal
+                vertical = left_wall and right_wall   # corridor is vertical
+
+                if tile == GATE_CLOSED:
+                    sprite = gate_closed_h if horizontal else gate_closed_v
+                else:
+                    sprite = gate_open_h if horizontal else gate_open_v
+                screen.blit(sprite, (sx, sy))
             elif tile==EXIT:
-                pygame.draw.rect(screen, GREEN,
-                                 (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+                screen.blit(finish_image, (sx, sy))
             else:
                 pygame.draw.rect(screen, LIGHT_GRAY,
                                  (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
