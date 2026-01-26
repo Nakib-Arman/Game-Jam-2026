@@ -318,119 +318,26 @@ def draw_menu(mouse):
     return buttons
 
 def draw_win_screen():
-    screen.fill((20, 20, 20))  # Same tone as MENU background
+    screen.fill((20, 30, 20))
 
     title_font = pygame.font.SysFont(None, 64)
-    msg_font = pygame.font.SysFont(None, 28)
+    msg_font = pygame.font.SysFont(None, 32)
 
-    title = title_font.render("YOU ESCAPED!", True, (200, 255, 200))
-    subtitle = msg_font.render(
-        "Congratulations, you found the exit.",
+    title = title_font.render("YOU ESCAPED!", True, (120, 255, 120))
+    msg = msg_font.render(
+        "Click or press any key to return to menu",
         True,
-        (220, 220, 220),
+        (230, 230, 230),
     )
 
-    screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, 160)))
-    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH // 2, 210)))
-
-    # ---------- BUTTONS ----------
-    btn_w, btn_h = 260, 60
-    spacing = 80
-    mouse = pygame.mouse.get_pos()
-
-    # NEW GAME button
-    new_game_rect = pygame.Rect(
-        SCREEN_WIDTH // 2 - btn_w // 2,
-        300,
-        btn_w,
-        btn_h,
-    )
-    hover = new_game_rect.collidepoint(mouse)
-    pygame.draw.rect(
-        screen,
-        (120, 120, 120) if hover else (80, 80, 80),
-        new_game_rect,
-    )
-    pygame.draw.rect(screen, (200, 200, 200), new_game_rect, 2)
-
-    new_game_text = msg_font.render("NEW GAME", True, (255, 255, 255))
     screen.blit(
-        new_game_text,
-        new_game_text.get_rect(center=new_game_rect.center),
+        title,
+        title.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 30)),
     )
-
-    # BACK TO MENU button
-    menu_rect = pygame.Rect(
-        SCREEN_WIDTH // 2 - btn_w // 2,
-        300 + spacing,
-        btn_w,
-        btn_h,
-    )
-    hover = menu_rect.collidepoint(mouse)
-    pygame.draw.rect(
-        screen,
-        (120, 120, 120) if hover else (80, 80, 80),
-        menu_rect,
-    )
-    pygame.draw.rect(screen, (200, 200, 200), menu_rect, 2)
-
-    menu_text = msg_font.render("BACK TO MENU", True, (255, 255, 255))
     screen.blit(
-        menu_text,
-        menu_text.get_rect(center=menu_rect.center),
+        msg,
+        msg.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30)),
     )
-
-    return new_game_rect, menu_rect
-
-
-
-def draw_game_over_screen():
-    screen.fill((20, 20, 20))  # Same background as MENU
-
-    title_font = pygame.font.SysFont(None, 64)
-    msg_font = pygame.font.SysFont(None, 28)
-
-    title = title_font.render("GAME OVER", True, (255, 120, 120))
-    subtitle = msg_font.render("You ran out of energy.", True, (220, 220, 220))
-
-    screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, 150)))
-    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH // 2, 200)))
-
-    # ---------- BUTTONS ----------
-    btn_w, btn_h = 260, 60
-    spacing = 80
-    mouse = pygame.mouse.get_pos()
-
-    # New Game button
-    new_game_rect = pygame.Rect(
-        SCREEN_WIDTH // 2 - btn_w // 2,
-        280,
-        btn_w,
-        btn_h,
-    )
-    hover = new_game_rect.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), new_game_rect)
-    pygame.draw.rect(screen, (200,200,200), new_game_rect, 2)
-
-    new_game_text = msg_font.render("NEW GAME", True, (255,255,255))
-    screen.blit(new_game_text, new_game_text.get_rect(center=new_game_rect.center))
-
-    # Back to Menu button
-    menu_rect = pygame.Rect(
-        SCREEN_WIDTH // 2 - btn_w // 2,
-        280 + spacing,
-        btn_w,
-        btn_h,
-    )
-    hover = menu_rect.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), menu_rect)
-    pygame.draw.rect(screen, (200,200,200), menu_rect, 2)
-
-    menu_text = msg_font.render("BACK TO MENU", True, (255,255,255))
-    screen.blit(menu_text, menu_text.get_rect(center=menu_rect.center))
-
-    return new_game_rect, menu_rect
-
 
 
 def start_new_game():
@@ -492,21 +399,6 @@ while running:
                (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 GAME_STATE = "MENU"
 
-        elif GAME_STATE == "WIN":
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if win_new_game_button.collidepoint(event.pos):
-                    start_new_game()
-                elif win_menu_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
-
-        elif GAME_STATE == "GAMEOVER":
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if gameover_new_game_button.collidepoint(event.pos):
-                    start_new_game()
-                elif gameover_menu_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
-
-
         elif GAME_STATE == "PLAYING":
             # Toggle map with M key
             if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
@@ -541,13 +433,6 @@ while running:
     elif GAME_STATE == "HOWTO":
         draw_howto()
 
-    elif GAME_STATE == "WIN":
-        win_new_game_button, win_menu_button = draw_win_screen()
-
-    elif GAME_STATE == "GAMEOVER":
-        gameover_new_game_button, gameover_menu_button = draw_game_over_screen()
-
-
     elif GAME_STATE == "PLAYING":
         keys = pygame.key.get_pressed()
         speed = MIN_MOVE_SPEED + (MAX_MOVE_SPEED - MIN_MOVE_SPEED) * (energy_percentage / 100)
@@ -580,9 +465,6 @@ while running:
         # Decrease light and energy
         light_percentage = max(MIN_LIGHT, light_percentage - LIGHT_DRAIN_PER_SEC * dt)
         energy_percentage = max(MIN_ENERGY, energy_percentage - ENERGY_DRAIN_PER_SEC * dt)
-        if energy_percentage <= 0:
-            GAME_STATE = "GAMEOVER"
-
 
         # --------------------------
         # ITEM COLLECTION LOGIC
@@ -595,8 +477,8 @@ while running:
             cave[py_cell][px_cell] = FLOOR  # Remove the item from the cave
 
             if item == EXIT:
-                GAME_STATE = "WIN"
-            elif item == LIGHT:
+                
+            if item == LIGHT:
                 light_percentage = min(MAX_LIGHT, light_percentage + 50)
             elif item == FOOD:
                 energy_percentage = min(MAX_ENERGY, energy_percentage + 50)

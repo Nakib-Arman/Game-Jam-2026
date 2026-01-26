@@ -496,7 +496,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if win_new_game_button.collidepoint(event.pos):
                     start_new_game()
-                elif win_menu_button.collidepoint(event.pos):
+                elif _menu_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
 
         elif GAME_STATE == "GAMEOVER":
@@ -542,7 +542,7 @@ while running:
         draw_howto()
 
     elif GAME_STATE == "WIN":
-        win_new_game_button, win_menu_button = draw_win_screen()
+        win_new_game_button = draw_win_screen()
 
     elif GAME_STATE == "GAMEOVER":
         gameover_new_game_button, gameover_menu_button = draw_game_over_screen()

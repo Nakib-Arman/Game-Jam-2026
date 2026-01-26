@@ -83,6 +83,7 @@ EXIT = 2
 MAP = 3
 FOOD = 4
 LIGHT = 5
+GATE_OPEN
 
 # ======================
 # INIT
@@ -255,17 +256,19 @@ def draw_world():
 
             tile = cave[wy][wx]
 
-            # Draw walls
+            # Draw walls and tiles
             if tile == WALL:
                 screen.blit(wall_image, (sx, sy))
-            elif tile==EXIT:
-                pygame.draw.rect(screen, GREEN,
-                                 (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+            elif tile == EXIT:
+                pygame.draw.rect(screen, (0, 200, 0), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+            elif tile == GATE_OPEN:
+                pygame.draw.rect(screen, (0, 255, 0), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))  # green
+            elif tile == GATE_CLOSED:
+                pygame.draw.rect(screen, (255, 0, 0), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))  # red
             else:
-                pygame.draw.rect(screen, LIGHT_GRAY,
-                                 (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+                pygame.draw.rect(screen, LIGHT_GRAY, (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
 
-            # Draw items as small circles on floor
+            # Draw items on floor
             circle_radius = BASE_CELL_SIZE // 4
             circle_center = (sx + BASE_CELL_SIZE // 2, sy + BASE_CELL_SIZE // 2)
 

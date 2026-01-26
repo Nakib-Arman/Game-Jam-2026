@@ -324,64 +324,43 @@ def draw_win_screen():
     msg_font = pygame.font.SysFont(None, 28)
 
     title = title_font.render("YOU ESCAPED!", True, (200, 255, 200))
-    subtitle = msg_font.render(
-        "Congratulations, you found the exit.",
-        True,
-        (220, 220, 220),
+    subtitle = msg_font.render("Congratulations, you found the exit.", True, (220, 220, 220))
+
+    screen.blit(
+        title,
+        title.get_rect(center=(SCREEN_WIDTH // 2, 160))
+    )
+    screen.blit(
+        subtitle,
+        subtitle.get_rect(center=(SCREEN_WIDTH // 2, 210))
     )
 
-    screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, 160)))
-    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH // 2, 210)))
-
-    # ---------- BUTTONS ----------
+    # ---------- NEW GAME BUTTON ----------
     btn_w, btn_h = 260, 60
-    spacing = 80
-    mouse = pygame.mouse.get_pos()
-
-    # NEW GAME button
-    new_game_rect = pygame.Rect(
+    btn_rect = pygame.Rect(
         SCREEN_WIDTH // 2 - btn_w // 2,
         300,
         btn_w,
         btn_h,
     )
-    hover = new_game_rect.collidepoint(mouse)
+
+    mouse = pygame.mouse.get_pos()
+    hover = btn_rect.collidepoint(mouse)
+
     pygame.draw.rect(
         screen,
         (120, 120, 120) if hover else (80, 80, 80),
-        new_game_rect,
+        btn_rect,
     )
-    pygame.draw.rect(screen, (200, 200, 200), new_game_rect, 2)
+    pygame.draw.rect(screen, (200, 200, 200), btn_rect, 2)
 
-    new_game_text = msg_font.render("NEW GAME", True, (255, 255, 255))
+    btn_text = msg_font.render("NEW GAME", True, (255, 255, 255))
     screen.blit(
-        new_game_text,
-        new_game_text.get_rect(center=new_game_rect.center),
+        btn_text,
+        btn_text.get_rect(center=btn_rect.center)
     )
 
-    # BACK TO MENU button
-    menu_rect = pygame.Rect(
-        SCREEN_WIDTH // 2 - btn_w // 2,
-        300 + spacing,
-        btn_w,
-        btn_h,
-    )
-    hover = menu_rect.collidepoint(mouse)
-    pygame.draw.rect(
-        screen,
-        (120, 120, 120) if hover else (80, 80, 80),
-        menu_rect,
-    )
-    pygame.draw.rect(screen, (200, 200, 200), menu_rect, 2)
-
-    menu_text = msg_font.render("BACK TO MENU", True, (255, 255, 255))
-    screen.blit(
-        menu_text,
-        menu_text.get_rect(center=menu_rect.center),
-    )
-
-    return new_game_rect, menu_rect
-
+    return btn_rect
 
 
 def draw_game_over_screen():
@@ -496,8 +475,6 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if win_new_game_button.collidepoint(event.pos):
                     start_new_game()
-                elif win_menu_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
 
         elif GAME_STATE == "GAMEOVER":
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -542,7 +519,7 @@ while running:
         draw_howto()
 
     elif GAME_STATE == "WIN":
-        win_new_game_button, win_menu_button = draw_win_screen()
+        win_new_game_button = draw_win_screen()
 
     elif GAME_STATE == "GAMEOVER":
         gameover_new_game_button, gameover_menu_button = draw_game_over_screen()
