@@ -12,7 +12,7 @@ current_level_index = 0
 LEVEL = LEVELS[current_level_index]
 
 def set_level_from_index():
-    global LEVEL, WORLD_ROWS, WORLD_COLS, MAP_NUM, FOOD_NUM, LIGHT_NUM, GATE_NUM, ENEMY_COUNT
+    global LEVEL, WORLD_ROWS, WORLD_COLS, MAP_NUM, FOOD_NUM, LIGHT_NUM, GATE_NUM
     LEVEL = LEVELS[current_level_index]
     if LEVEL == "easy":
         WORLD_ROWS = 46
@@ -21,7 +21,6 @@ def set_level_from_index():
         FOOD_NUM = 8
         LIGHT_NUM = 8
         GATE_NUM = 10
-        ENEMY_COUNT = 10
     elif LEVEL == "medium":
         WORLD_ROWS = 71
         WORLD_COLS = 75
@@ -29,7 +28,6 @@ def set_level_from_index():
         FOOD_NUM = 16
         LIGHT_NUM = 16
         GATE_NUM = 20
-        ENEMY_COUNT = 20
     elif LEVEL == "hard":
         WORLD_ROWS = 96
         WORLD_COLS = 100
@@ -37,7 +35,6 @@ def set_level_from_index():
         FOOD_NUM = 32
         LIGHT_NUM = 32
         GATE_NUM = 40
-        ENEMY_COUNT = 40
 
 set_level_from_index()
 
@@ -56,12 +53,6 @@ FPS = 60
 BLACK = (0, 0, 0)
 LIGHT_GRAY = (98, 87, 85)
 GREEN = (0, 200, 0)
-
-inventory = {
-    "FOOD": 0,
-    "MAP": 0
-}
-
 
 # ======================
 # MOVEMENT
@@ -89,8 +80,9 @@ ENERGY_DRAIN_PER_SEC = 0.6
 # ======================
 # ENEMIES
 # ======================
+ENEMY_COUNT = 5  # can scale with level
 ENEMY_SPEED = 100  # pixels per second
-ENEMY_TRIGGER_LIGHT = 20  # light % at which enemies start moving
+ENEMY_TRIGGER_LIGHT = 30  # light % at which enemies start moving
 
 # ======================
 # TILE CONSTANTS
@@ -225,15 +217,6 @@ def draw_map_button():
     screen.blit(text, text.get_rect(center=rect.center))
     return rect
 
-def draw_trade_button():
-    rect = pygame.Rect(SCREEN_WIDTH - 110, 60, 100, 40)
-    pygame.draw.rect(screen, (80, 80, 80), rect)
-    pygame.draw.rect(screen, (200, 200, 200), rect, 2)
-    text = font.render("TRADE", True, (255, 255, 255))
-    screen.blit(text, text.get_rect(center=rect.center))
-    return rect
-
-
 def draw_bar(x, y, value, label, color):
     w, h = 200, 20
     pygame.draw.rect(screen, (50, 50, 50), (x, y, w, h))
@@ -355,12 +338,6 @@ def draw_menu(mouse):
         buttons[label] = rect
     return buttons
 
-def draw_inventory():
-    x, y = 10, SCREEN_HEIGHT - 100
-    txt = font.render(f"Inventory: FOOD={inventory['FOOD']} MAP={inventory['MAP']}", True, (255, 255, 255))
-    screen.blit(txt, (x, y))
-
-
 def draw_win_screen():
     screen.fill((20, 20, 20))  # Same tone as MENU background
 
@@ -474,50 +451,6 @@ def draw_game_over_screen():
     screen.blit(menu_text, menu_text.get_rect(center=menu_rect.center))
 
     return new_game_rect, menu_rect
-
-
-def draw_trade_menu(mouse):
-    screen.fill((30, 30, 30))
-    title_font = pygame.font.SysFont(None, 48)
-    msg_font = pygame.font.SysFont(None, 28)
-    
-    title = title_font.render("TRADE ITEMS", True, (255, 255, 255))
-    screen.blit(title, title.get_rect(center=(SCREEN_WIDTH//2, 50)))
-    
-    buttons = {}
-    y_start = 150
-    spacing = 60
-    btn_w, btn_h = 300, 50
-    
-    # Option 1: Trade FOOD -> Energy
-    rect_food = pygame.Rect(SCREEN_WIDTH//2 - btn_w//2, y_start, btn_w, btn_h)
-    hover = rect_food.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_food)
-    pygame.draw.rect(screen, (200,200,200), rect_food, 2)
-    text = msg_font.render(f"FOOD -> +50 Energy ({inventory['FOOD']})", True, (255,255,255))
-    screen.blit(text, text.get_rect(center=rect_food.center))
-    buttons["FOOD"] = rect_food
-    
-    # Option 2: Trade MAP -> +10 Map Uses
-    rect_map = pygame.Rect(SCREEN_WIDTH//2 - btn_w//2, y_start + spacing, btn_w, btn_h)
-    hover = rect_map.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_map)
-    pygame.draw.rect(screen, (200,200,200), rect_map, 2)
-    text = msg_font.render(f"MAP -> +10 Map Uses ({inventory['MAP']})", True, (255,255,255))
-    screen.blit(text, text.get_rect(center=rect_map.center))
-    buttons["MAP"] = rect_map
-    
-    # Back button
-    rect_back = pygame.Rect(SCREEN_WIDTH//2 - btn_w//2, y_start + spacing*2, btn_w, btn_h)
-    hover = rect_back.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_back)
-    pygame.draw.rect(screen, (200,200,200), rect_back, 2)
-    text = msg_font.render("BACK", True, (255,255,255))
-    screen.blit(text, text.get_rect(center=rect_back.center))
-    buttons["BACK"] = rect_back
-    
-    return buttons
-
 
 
 
@@ -638,7 +571,6 @@ while running:
                 elif map_count > 0:
                     show_map = True
                     map_count -= 1
-                    inventory["MAP"] -= 1
 
 
             # Toggle map with mouse button
@@ -671,9 +603,6 @@ while running:
                         # Only open if player has a map
                         show_map = True
                         map_count -= 1
-                        inventory["MAP"] -= 1
-                elif trade_button.collidepoint(event.pos):
-                    GAME_STATE = "TRADE"
 
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
@@ -694,19 +623,6 @@ while running:
     elif GAME_STATE == "GAMEOVER":
         gameover_new_game_button, gameover_menu_button = draw_game_over_screen()
 
-    elif GAME_STATE == "TRADE":
-        trade_buttons = draw_trade_menu(mouse)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if trade_buttons["FOOD"].collidepoint(event.pos) and inventory["FOOD"] > 0:
-                    inventory["FOOD"] -= 1
-                    energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
-                elif trade_buttons["MAP"].collidepoint(event.pos) and inventory["MAP"] > 0:
-                    inventory["MAP"] -= 1
-                    map_count += 10
-                elif trade_buttons["BACK"].collidepoint(event.pos):
-                    GAME_STATE = "PLAYING"
 
     elif GAME_STATE == "PLAYING":
         keys = pygame.key.get_pressed()
@@ -759,19 +675,9 @@ while running:
             elif item == LIGHT:
                 light_percentage = min(MAX_LIGHT, light_percentage + 50)
             elif item == FOOD:
-                if energy_percentage > 50:
-                    # Store in inventory
-                    inventory["FOOD"] += 1
-                else:
-                    # Consume immediately
-                    energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
+                energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
             elif item == MAP:
-                if energy_percentage > 50:
-                    inventory["MAP"] += 1
-                    map_count += 1
-                else:
-                    map_count += 10
-
+                map_count += 10  # Player can now open the map once
                 
 
         # Drawing
@@ -790,29 +696,22 @@ while running:
         # ENEMY LOGIC
         # --------------------------
         for enemy in enemies:
+            # Trigger if player light is high
             if light_percentage >= ENEMY_TRIGGER_LIGHT:
                 dx = player_x - enemy["x"]
                 dy = player_y - enemy["y"]
                 dist = (dx**2 + dy**2) ** 0.5
                 if dist != 0:
                     move_dist = ENEMY_SPEED * dt
-                    step_x = dx / dist * move_dist
-                    step_y = dy / dist * move_dist
+                    enemy["x"] += dx / dist * move_dist
+                    enemy["y"] += dy / dist * move_dist
 
-                    # Move separately in x and y, checking collisions
-                    if can_move_pixel(enemy["x"] + step_x, enemy["y"]):
-                        enemy["x"] += step_x
-                    if can_move_pixel(enemy["x"], enemy["y"] + step_y):
-                        enemy["y"] += step_y
-
-                # Collision with player
+                # Check collision with player
                 if abs(enemy["x"] - player_x) < player_radius and abs(enemy["y"] - player_y) < player_radius:
                     GAME_STATE = "GAMEOVER"
 
 
         map_button = draw_map_button()
-        trade_button = draw_trade_button()
-        draw_inventory()
 
     pygame.display.flip()
 

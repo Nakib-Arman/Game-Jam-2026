@@ -707,6 +707,7 @@ while running:
                     map_count += 10
                 elif trade_buttons["BACK"].collidepoint(event.pos):
                     GAME_STATE = "PLAYING"
+                    
 
     elif GAME_STATE == "PLAYING":
         keys = pygame.key.get_pressed()

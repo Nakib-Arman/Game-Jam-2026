@@ -694,7 +694,7 @@ while running:
     elif GAME_STATE == "GAMEOVER":
         gameover_new_game_button, gameover_menu_button = draw_game_over_screen()
 
-    elif GAME_STATE == "TRADE":
+    if GAME_STATE == "TRADE":
         trade_buttons = draw_trade_menu(mouse)
         
         for event in pygame.event.get():

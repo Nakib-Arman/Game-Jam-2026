@@ -694,7 +694,7 @@ while running:
     elif GAME_STATE == "GAMEOVER":
         gameover_new_game_button, gameover_menu_button = draw_game_over_screen()
 
-    elif GAME_STATE == "TRADE":
+    if GAME_STATE == "TRADE":
         trade_buttons = draw_trade_menu(mouse)
         
         for event in pygame.event.get():
@@ -707,6 +707,8 @@ while running:
                     map_count += 10
                 elif trade_buttons["BACK"].collidepoint(event.pos):
                     GAME_STATE = "PLAYING"
+
+
 
     elif GAME_STATE == "PLAYING":
         keys = pygame.key.get_pressed()

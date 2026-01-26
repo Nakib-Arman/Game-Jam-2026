@@ -476,50 +476,6 @@ def draw_game_over_screen():
     return new_game_rect, menu_rect
 
 
-def draw_trade_menu(mouse):
-    screen.fill((30, 30, 30))
-    title_font = pygame.font.SysFont(None, 48)
-    msg_font = pygame.font.SysFont(None, 28)
-    
-    title = title_font.render("TRADE ITEMS", True, (255, 255, 255))
-    screen.blit(title, title.get_rect(center=(SCREEN_WIDTH//2, 50)))
-    
-    buttons = {}
-    y_start = 150
-    spacing = 60
-    btn_w, btn_h = 300, 50
-    
-    # Option 1: Trade FOOD -> Energy
-    rect_food = pygame.Rect(SCREEN_WIDTH//2 - btn_w//2, y_start, btn_w, btn_h)
-    hover = rect_food.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_food)
-    pygame.draw.rect(screen, (200,200,200), rect_food, 2)
-    text = msg_font.render(f"FOOD -> +50 Energy ({inventory['FOOD']})", True, (255,255,255))
-    screen.blit(text, text.get_rect(center=rect_food.center))
-    buttons["FOOD"] = rect_food
-    
-    # Option 2: Trade MAP -> +10 Map Uses
-    rect_map = pygame.Rect(SCREEN_WIDTH//2 - btn_w//2, y_start + spacing, btn_w, btn_h)
-    hover = rect_map.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_map)
-    pygame.draw.rect(screen, (200,200,200), rect_map, 2)
-    text = msg_font.render(f"MAP -> +10 Map Uses ({inventory['MAP']})", True, (255,255,255))
-    screen.blit(text, text.get_rect(center=rect_map.center))
-    buttons["MAP"] = rect_map
-    
-    # Back button
-    rect_back = pygame.Rect(SCREEN_WIDTH//2 - btn_w//2, y_start + spacing*2, btn_w, btn_h)
-    hover = rect_back.collidepoint(mouse)
-    pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_back)
-    pygame.draw.rect(screen, (200,200,200), rect_back, 2)
-    text = msg_font.render("BACK", True, (255,255,255))
-    screen.blit(text, text.get_rect(center=rect_back.center))
-    buttons["BACK"] = rect_back
-    
-    return buttons
-
-
-
 
 def start_new_game():
     global cave, player_x, player_y, map_count
@@ -672,8 +628,7 @@ while running:
                         show_map = True
                         map_count -= 1
                         inventory["MAP"] -= 1
-                elif trade_button.collidepoint(event.pos):
-                    GAME_STATE = "TRADE"
+                elif
 
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
@@ -694,19 +649,6 @@ while running:
     elif GAME_STATE == "GAMEOVER":
         gameover_new_game_button, gameover_menu_button = draw_game_over_screen()
 
-    elif GAME_STATE == "TRADE":
-        trade_buttons = draw_trade_menu(mouse)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if trade_buttons["FOOD"].collidepoint(event.pos) and inventory["FOOD"] > 0:
-                    inventory["FOOD"] -= 1
-                    energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
-                elif trade_buttons["MAP"].collidepoint(event.pos) and inventory["MAP"] > 0:
-                    inventory["MAP"] -= 1
-                    map_count += 10
-                elif trade_buttons["BACK"].collidepoint(event.pos):
-                    GAME_STATE = "PLAYING"
 
     elif GAME_STATE == "PLAYING":
         keys = pygame.key.get_pressed()

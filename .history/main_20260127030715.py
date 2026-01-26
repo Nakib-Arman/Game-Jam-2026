@@ -694,19 +694,6 @@ while running:
     elif GAME_STATE == "GAMEOVER":
         gameover_new_game_button, gameover_menu_button = draw_game_over_screen()
 
-    elif GAME_STATE == "TRADE":
-        trade_buttons = draw_trade_menu(mouse)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if trade_buttons["FOOD"].collidepoint(event.pos) and inventory["FOOD"] > 0:
-                    inventory["FOOD"] -= 1
-                    energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
-                elif trade_buttons["MAP"].collidepoint(event.pos) and inventory["MAP"] > 0:
-                    inventory["MAP"] -= 1
-                    map_count += 10
-                elif trade_buttons["BACK"].collidepoint(event.pos):
-                    GAME_STATE = "PLAYING"
 
     elif GAME_STATE == "PLAYING":
         keys = pygame.key.get_pressed()
