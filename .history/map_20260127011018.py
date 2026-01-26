@@ -7,8 +7,6 @@ EXIT = 2
 MAP = 3
 FOOD = 4
 LIGHT = 5
-GATE_CLOSED = 6
-GATE_OPEN = 7
 
 def draw_map(screen, cave, player_pos, screen_size):
     rows = len(cave)
@@ -39,9 +37,7 @@ def draw_map(screen, cave, player_pos, screen_size):
             elif cell == EXIT:
                 color = (0, 200, 0)  # exit
             elif cell == GATE_CLOSED:
-                color = (0,0,0)
-            elif cell == GATE_OPEN:
-                color = (255,255,255)
+                color = (45,)
 
             rect = pygame.Rect(
                 offset_x + x * cell_size,

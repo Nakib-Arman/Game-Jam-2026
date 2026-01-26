@@ -7,8 +7,7 @@ EXIT = 2
 MAP = 3
 FOOD = 4
 LIGHT = 5
-GATE_CLOSED = 6
-GATE_OPEN = 7
+GATE
 
 def draw_map(screen, cave, player_pos, screen_size):
     rows = len(cave)

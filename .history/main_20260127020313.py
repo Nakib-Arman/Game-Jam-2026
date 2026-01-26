@@ -489,6 +489,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if menu_buttons["NEW GAME"].collidepoint(event.pos):
                     start_new_game()
+                    print("hi")
                 elif menu_buttons["LEVEL"].collidepoint(event.pos):
                     current_level_index = (current_level_index + 1) % len(LEVELS)
                     set_level_from_index()
@@ -538,12 +539,16 @@ while running:
                             break
 
                     if exit_cell:
+                        for rows in cave:
+                            print(rows)
                         rearrange_gates(
                             cave,
                             (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
                             exit_cell,
                             open_ratio=0.5  # half open, half closed
                         )
+                        for rows in cave:
+                            print(rows)
 
 
             # Toggle map with mouse button
@@ -556,26 +561,6 @@ while running:
                         # Only open if player has a map
                         show_map = True
                         map_count -= 1
-
-                        # Toggle gates randomly when map is viewed
-                        exit_cell = None
-                        for y in range(WORLD_ROWS):
-                            for x in range(WORLD_COLS):
-                                if cave[y][x] == EXIT:
-                                    exit_cell = (x, y)
-                                    break
-                            if exit_cell:
-                                break
-
-                        if exit_cell:
-                            for rows in cave:
-                                print(rows)
-                            rearrange_gates(
-                                cave,
-                                (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                                exit_cell,
-                                open_ratio=0.5  # half open, half closed
-                            )
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
 

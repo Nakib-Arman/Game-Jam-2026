@@ -1,6 +1,5 @@
 import pygame
 from cave import generate_cave
-from cave import rearrange_gates
 from map import draw_map
 
 # ======================
@@ -12,29 +11,26 @@ current_level_index = 0
 LEVEL = LEVELS[current_level_index]
 
 def set_level_from_index():
-    global LEVEL, WORLD_ROWS, WORLD_COLS, MAP_NUM, FOOD_NUM, LIGHT_NUM, GATE_NUM
+    global LEVEL, WORLD_ROWS, WORLD_COLS, MAP_NUM, FOOD_NUM, LIGHT_NUM
     LEVEL = LEVELS[current_level_index]
     if LEVEL == "easy":
         WORLD_ROWS = 46
         WORLD_COLS = 50
-        MAP_NUM = 30
+        MAP_NUM = 3
         FOOD_NUM = 8
         LIGHT_NUM = 8
-        GATE_NUM = 10
     elif LEVEL == "medium":
         WORLD_ROWS = 71
         WORLD_COLS = 75
         MAP_NUM = 6
         FOOD_NUM = 16
         LIGHT_NUM = 16
-        GATE_NUM = 20
     elif LEVEL == "hard":
         WORLD_ROWS = 96
         WORLD_COLS = 100
         MAP_NUM = 12
         FOOD_NUM = 32
         LIGHT_NUM = 32
-        GATE_NUM = 40
 
 set_level_from_index()
 
@@ -448,7 +444,7 @@ def start_new_game():
     global light_percentage, energy_percentage, GAME_STATE
     set_level_from_index()
     cave, (cx, cy) = generate_cave(
-        WORLD_ROWS, WORLD_COLS, DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE, MAP_NUM, FOOD_NUM, LIGHT_NUM, GATE_NUM
+        WORLD_ROWS, WORLD_COLS, DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE, MAP_NUM, FOOD_NUM, LIGHT_NUM
     )
     player_x = cx * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
     player_y = cy * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
@@ -525,7 +521,7 @@ while running:
                     show_map = False
                 elif map_count > 0:
                     show_map = True
-                    map_count -= 1
+                    # map_count -= 1
 
                     # Toggle gates randomly when map is viewed
                     exit_cell = None
@@ -538,12 +534,11 @@ while running:
                             break
 
                     if exit_cell:
-                        rearrange_gates(
-                            cave,
-                            (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                            exit_cell,
-                            open_ratio=0.5  # half open, half closed
-                        )
+                        from cave import toggle_gates_randomly
+                        toggle_gates_randomly(cave,
+                                            (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
+                                            exit_cell,
+                                            open_ratio=0.5)
 
 
             # Toggle map with mouse button
@@ -555,27 +550,7 @@ while running:
                     elif map_count > 0:
                         # Only open if player has a map
                         show_map = True
-                        map_count -= 1
-
-                        # Toggle gates randomly when map is viewed
-                        exit_cell = None
-                        for y in range(WORLD_ROWS):
-                            for x in range(WORLD_COLS):
-                                if cave[y][x] == EXIT:
-                                    exit_cell = (x, y)
-                                    break
-                            if exit_cell:
-                                break
-
-                        if exit_cell:
-                            for rows in cave:
-                                print(rows)
-                            rearrange_gates(
-                                cave,
-                                (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                                exit_cell,
-                                open_ratio=0.5  # half open, half closed
-                            )
+                        # map_count -= 1
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
 
@@ -649,7 +624,7 @@ while running:
             elif item == FOOD:
                 energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
             elif item == MAP:
-                map_count += 10  # Player can now open the map once
+                map_count += 1  # Player can now open the map once
                 
 
         # Drawing

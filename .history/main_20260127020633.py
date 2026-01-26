@@ -538,12 +538,16 @@ while running:
                             break
 
                     if exit_cell:
+                        for rows in cave:
+                            print(rows)
                         rearrange_gates(
                             cave,
                             (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
                             exit_cell,
                             open_ratio=0.5  # half open, half closed
                         )
+                        for rows in cave:
+                            print(rows)
 
 
             # Toggle map with mouse button

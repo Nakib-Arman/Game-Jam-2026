@@ -542,7 +542,7 @@ while running:
                             cave,
                             (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
                             exit_cell,
-                            open_ratio=0.5  # half open, half closed
+                            open_ratio=0.3  # half open, half closed
                         )
 
 
@@ -556,26 +556,6 @@ while running:
                         # Only open if player has a map
                         show_map = True
                         map_count -= 1
-
-                        # Toggle gates randomly when map is viewed
-                        exit_cell = None
-                        for y in range(WORLD_ROWS):
-                            for x in range(WORLD_COLS):
-                                if cave[y][x] == EXIT:
-                                    exit_cell = (x, y)
-                                    break
-                            if exit_cell:
-                                break
-
-                        if exit_cell:
-                            for rows in cave:
-                                print(rows)
-                            rearrange_gates(
-                                cave,
-                                (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                                exit_cell,
-                                open_ratio=0.5  # half open, half closed
-                            )
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
 
