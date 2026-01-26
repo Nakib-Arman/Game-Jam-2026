@@ -353,29 +353,18 @@ while running:
                 GAME_STATE = "MENU"
 
         elif GAME_STATE == "PLAYING":
-            # Toggle map with M key
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
-                if show_map:
-                    # Always allow closing the map
-                    show_map = False
-                elif map_count > 0:
-                    # Only open if player has a map
-                    show_map = True
-                    map_count -= 1
-
-            # Toggle map with mouse button
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if map_button.collidepoint(event.pos):
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m and map_count > 0:
+                    show_map = not show_map
                     if show_map:
-                        # Always allow closing
-                        show_map = False
-                    elif map_count > 0:
-                        # Only open if player has a map
-                        show_map = True
+                        map_count -= 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if map_button.collidepoint(event.pos) and map_count > 0:
+                    show_map = not show_map
+                    if show_map:
                         map_count -= 1
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
-
 
     # ----------------
     # DRAWING & MOVEMENT
@@ -434,7 +423,7 @@ while running:
             elif item == FOOD:
                 energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
             elif item == MAP:
-                map_count += 1  # Player can now open the map once
+                map_count += 2  # Player can now open the map once
 
         # Drawing
         screen.fill(BLACK)

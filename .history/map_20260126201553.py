@@ -30,10 +30,8 @@ def draw_map(screen, cave, player_pos, screen_size):
 
             # Wall or floor
             color = (30, 30, 30)  # wall
-            if cell == FLOOR:
+            if cell == FLOOR or:
                 color = (120, 120, 120)
-            elif cell == WALL:
-                color = (60,35,20)
             elif cell == EXIT:
                 color = (0, 200, 0)  # exit
 
@@ -51,7 +49,6 @@ def draw_map(screen, cave, player_pos, screen_size):
                 offset_x + x * cell_size + cell_size // 2,
                 offset_y + y * cell_size + cell_size // 2
             )
-
         
 
             if cell == MAP:

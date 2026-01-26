@@ -1,16 +1,9 @@
 import random
 from collections import deque
-import math
 
-# ----------------------
-# Tile definitions
-# ----------------------
 WALL = 1
 FLOOR = 0
 EXIT = 2
-MAP = 3
-FOOD = 4
-LIGHT = 5
 
 TOP_BORDER = 3
 BOTTOM_BORDER = 3
@@ -19,12 +12,9 @@ RIGHT_BORDER = 5
 
 
 def generate_cave(rows, cols,
-                  room_density=0.015,   # room generation density
-                  min_room_size=3,
-                  max_room_size=6,
-                  num_maps=5,           # number of maps to scatter
-                  num_foods=10,         # number of foods to scatter
-                  num_lights=8):        # number of lights to scatter
+                  room_density=0.015,   # ← KEY CHANGE
+                  min_room_size,
+                  max_room_size=6):
 
     cave = [[WALL for _ in range(cols)] for _ in range(rows)]
 
@@ -34,7 +24,7 @@ def generate_cave(rows, cols,
     max_y = rows - BOTTOM_BORDER - 1
 
     # ----------------------
-    # Maze generation (iterative DFS)
+    # Maze generation (iterative)
     # ----------------------
     start_x = min_x | 1
     start_y = min_y | 1
@@ -86,6 +76,7 @@ def generate_cave(rows, cols,
         x, y, w, h = room
         return (x + w // 2, y + h // 2)
 
+    # Scale room attempts with area
     room_attempts = int(rows * cols * room_density)
 
     for _ in range(room_attempts):
@@ -114,48 +105,6 @@ def generate_cave(rows, cols,
     exit_x, exit_y = find_farthest_cell(cave, spawn_x, spawn_y)
     cave[exit_y][exit_x] = EXIT
 
-    # ----------------------
-    # Scatter items
-    # ----------------------
-    def scatter_item(cave, item_id, count, min_distance=4):
-        """
-        Scatter `count` items of type `item_id` on the cave floor.
-        Ensures that no two same items are closer than `min_distance` tiles.
-        """
-        rows, cols = len(cave), len(cave[0])
-        placed_positions = []
-
-        attempts = 0
-        max_attempts = count * 50  # prevent infinite loops
-
-        while len(placed_positions) < count and attempts < max_attempts:
-            x = random.randint(LEFT_BORDER, cols - RIGHT_BORDER - 1)
-            y = random.randint(TOP_BORDER, rows - BOTTOM_BORDER - 1)
-
-            if cave[y][x] != FLOOR:
-                attempts += 1
-                continue
-
-            too_close = False
-            for px, py in placed_positions:
-                distance = math.sqrt((px - x)**2 + (py - y)**2)
-                if distance < min_distance:
-                    too_close = True
-                    break
-
-            if too_close:
-                attempts += 1
-                continue
-
-            cave[y][x] = item_id
-            placed_positions.append((x, y))
-            attempts += 1
-
-    # Scatter items with spacing constraints
-    scatter_item(cave, MAP, num_maps, min_distance=5)
-    scatter_item(cave, FOOD, num_foods, min_distance=3)
-    scatter_item(cave, LIGHT, num_lights, min_distance=4)
-
     return cave, (spawn_x, spawn_y)
 
 
@@ -177,51 +126,3 @@ def find_farthest_cell(cave, start_x, start_y):
                     farthest = (nx, ny)
 
     return farthest
-
-
-# ----------------------
-# Print cave function
-# ----------------------
-def print_cave(cave, spawn=None):
-    """
-    Prints the cave in a readable format:
-    # → WALL
-    . → FLOOR
-    S → Spawn
-    E → Exit
-    M → Map
-    F → Food
-    L → Light
-    """
-    tile_symbols = {
-        WALL: "#",
-        FLOOR: ".",
-        EXIT: "E",
-        MAP: "M",
-        FOOD: "F",
-        LIGHT: "L"
-    }
-
-    for y, row in enumerate(cave):
-        line = ""
-        for x, cell in enumerate(row):
-            if spawn and (x, y) == spawn:
-                line += "S"
-            else:
-                line += tile_symbols.get(cell, "?")
-        print(line)
-
-
-# ----------------------
-# Example usage
-# ----------------------
-if __name__ == "__main__":
-    cave, spawn = generate_cave(
-        rows=20,
-        cols=30,
-        num_maps=3,
-        num_foods=6,
-        num_lights=5
-    )
-    print("Spawn position:", spawn)
-    print_cave(cave, spawn)

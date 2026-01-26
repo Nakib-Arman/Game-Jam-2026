@@ -32,8 +32,6 @@ def draw_map(screen, cave, player_pos, screen_size):
             color = (30, 30, 30)  # wall
             if cell == FLOOR:
                 color = (120, 120, 120)
-            elif cell == WALL:
-                color = (60,35,20)
             elif cell == EXIT:
                 color = (0, 200, 0)  # exit
 

@@ -23,19 +23,22 @@ def draw_map(screen, cave, player_pos, screen_size):
     offset_x = (screen_size[0] - (cols * cell_size)) // 2
     offset_y = (screen_size[1] - (rows * cell_size)) // 2
 
-    # Draw map cells
     for y in range(rows):
         for x in range(cols):
             cell = cave[y][x]
 
-            # Wall or floor
-            color = (30, 30, 30)  # wall
+            # Default wall color
+            color = (30, 30, 30)
             if cell == FLOOR:
                 color = (120, 120, 120)
-            elif cell == WALL:
-                color = (60,35,20)
             elif cell == EXIT:
-                color = (0, 200, 0)  # exit
+                color = (0, 200, 0)
+            elif cell == MAP:
+                color = (0, 150, 255)   # Blue for maps
+            elif cell == FOOD:
+                color = (255, 180, 0)   # Orange for food
+            elif cell == LIGHT:
+                color = (255, 255, 100) # Yellow for light
 
             rect = pygame.Rect(
                 offset_x + x * cell_size,
@@ -45,23 +48,7 @@ def draw_map(screen, cave, player_pos, screen_size):
             )
             pygame.draw.rect(screen, color, rect)
 
-            # Draw items as small circles
-            circle_radius = cell_size // 3
-            circle_center = (
-                offset_x + x * cell_size + cell_size // 2,
-                offset_y + y * cell_size + cell_size // 2
-            )
-
-        
-
-            if cell == MAP:
-                pygame.draw.circle(screen, (0, 150, 255), circle_center, circle_radius)
-            elif cell == FOOD:
-                pygame.draw.circle(screen, (255, 100, 0), circle_center, circle_radius)
-            elif cell == LIGHT:
-                pygame.draw.circle(screen, (255, 255, 50), circle_center, circle_radius)
-
-    # Draw player as a square (like before)
+    # Draw player
     px, py = player_pos
     player_rect = pygame.Rect(
         offset_x + px * cell_size,

@@ -434,7 +434,7 @@ while running:
             elif item == FOOD:
                 energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
             elif item == MAP:
-                map_count += 1  # Player can now open the map once
+                map_count +=   # Player can now open the map once
 
         # Drawing
         screen.fill(BLACK)

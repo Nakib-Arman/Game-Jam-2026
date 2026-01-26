@@ -1,4 +1,5 @@
 import pygame
+import random
 from cave import generate_cave
 from map import draw_map
 
@@ -11,17 +12,26 @@ current_level_index = 0
 LEVEL = LEVELS[current_level_index]
 
 def set_level_from_index():
-    global LEVEL, WORLD_ROWS, WORLD_COLS
+    global LEVEL, WORLD_ROWS, WORLD_COLS, NUM_MAPS, NUM_LIGHTS, NUM_FOODS
     LEVEL = LEVELS[current_level_index]
     if LEVEL == "easy":
         WORLD_ROWS = 46
         WORLD_COLS = 50
+        NUM_MAPS = 1
+        NUM_LIGHTS = 3
+        NUM_FOODS = 3
     elif LEVEL == "medium":
         WORLD_ROWS = 71
         WORLD_COLS = 75
+        NUM_MAPS = 2
+        NUM_LIGHTS = 5
+        NUM_FOODS = 5
     elif LEVEL == "hard":
         WORLD_ROWS = 96
         WORLD_COLS = 100
+        NUM_MAPS = 3
+        NUM_LIGHTS = 8
+        NUM_FOODS = 8
 
 set_level_from_index()
 
@@ -65,17 +75,6 @@ MIN_ENERGY = 0
 ENERGY_DRAIN_PER_SEC = 0.6
 
 # ======================
-# TILE CONSTANTS
-# ======================
-
-WALL = 1
-FLOOR = 0
-EXIT = 2
-MAP = 3
-FOOD = 4
-LIGHT = 5
-
-# ======================
 # INIT
 # ======================
 
@@ -87,7 +86,7 @@ pygame.display.set_caption("Cave Explorer")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 24)
 
-wall_image = pygame.image.load("assets/wall_block.jpg")
+wall_image = pygame.image.load("assets/wall_block.png")
 wall_image = pygame.transform.scale(
     wall_image, (BASE_CELL_SIZE, BASE_CELL_SIZE)
 )
@@ -144,9 +143,9 @@ ANIM_SPEED = 0.15
 
 light_percentage = MAX_LIGHT
 energy_percentage = MAX_ENERGY
-map_count = 0  # Number of times player can open the map after collecting MAP
 
 show_map = False
+map_unlocked = False
 
 # ======================
 # HELPERS
@@ -159,7 +158,7 @@ def can_move_pixel(x, y):
             cy = int((y + oy) // BASE_CELL_SIZE)
             if not (0 <= cx < WORLD_COLS and 0 <= cy < WORLD_ROWS):
                 return False
-            if cave[cy][cx] == WALL:
+            if cave[cy][cx] == 1:
                 return False
     return True
 
@@ -169,6 +168,21 @@ def get_camera_offset():
     cam_x = max(0, min(cam_x, WORLD_COLS * BASE_CELL_SIZE - SCREEN_WIDTH))
     cam_y = max(0, min(cam_y, WORLD_ROWS * BASE_CELL_SIZE - SCREEN_HEIGHT))
     return int(cam_x), int(cam_y)
+
+def place_items_in_cave():
+    global cave
+    # Place maps (3), lights (4), foods (5)
+    def place_item(number, count):
+        placed = 0
+        while placed < count:
+            x = random.randint(0, WORLD_COLS - 1)
+            y = random.randint(0, WORLD_ROWS - 1)
+            if cave[y][x] == 0:  # floor
+                cave[y][x] = number
+                placed += 1
+    place_item(3, NUM_MAPS)
+    place_item(4, NUM_LIGHTS)
+    place_item(5, NUM_FOODS)
 
 # ======================
 # UI ELEMENTS
@@ -231,34 +245,24 @@ def draw_world():
             if not (0 <= wx < WORLD_COLS and 0 <= wy < WORLD_ROWS):
                 continue
 
-            tile = cave[wy][wx]
-
-            # Draw walls
-            if tile == WALL:
+            cell = cave[wy][wx]
+            if cell == 1:
                 screen.blit(wall_image, (sx, sy))
-            else:
-                pygame.draw.rect(screen, LIGHT_GRAY,
-                                 (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+            elif cell == 0 or cell == 2:
+                pygame.draw.rect(screen, LIGHT_GRAY, (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+            elif cell == 3:  # map
+                pygame.draw.rect(screen, (100, 255, 100), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+            elif cell == 4:  # light/fire
+                pygame.draw.rect(screen, (255, 255, 100), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
+            elif cell == 5:  # food
+                pygame.draw.rect(screen, (255, 100, 100), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
 
-            # Draw items as small circles on floor
-            circle_radius = BASE_CELL_SIZE // 4
-            circle_center = (sx + BASE_CELL_SIZE // 2, sy + BASE_CELL_SIZE // 2)
-
-            if tile in (MAP, FOOD, LIGHT):
-                # Dark brown background
-                pygame.draw.circle(screen, (60, 35, 20), circle_center, circle_radius)
-
-                # Item colors
-                if tile == MAP:
-                    pygame.draw.circle(screen, (0, 150, 255), circle_center, circle_radius)
-                elif tile == FOOD:
-                    pygame.draw.circle(screen, (255, 100, 0), circle_center, circle_radius)
-                elif tile == LIGHT:
-                    pygame.draw.circle(screen, (255, 255, 50), circle_center, circle_radius)
-
-    # Draw player sprite
+    # Draw player
     sprite = sprites[player_direction][animation_frame]
-    screen.blit(sprite, sprite.get_rect(center=(player_x - cam_x, player_y - cam_y)))
+    screen.blit(
+        sprite,
+        sprite.get_rect(center=(player_x - cam_x, player_y - cam_y))
+    )
 
 # ======================
 # MENU
@@ -282,7 +286,6 @@ def draw_menu(mouse):
         pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect)
         pygame.draw.rect(screen, (200,200,200), rect, 2)
 
-        # For LEVEL, show current level
         if label == "LEVEL":
             text_label = f"LEVEL: {LEVEL.upper()}"
         else:
@@ -294,33 +297,18 @@ def draw_menu(mouse):
     return buttons
 
 def start_new_game():
-    global cave, player_x, player_y, map_count
-    global light_percentage, energy_percentage, GAME_STATE
+    global cave, player_x, player_y, light_percentage, energy_percentage, GAME_STATE, map_unlocked
     set_level_from_index()
     cave, (cx, cy) = generate_cave(
         WORLD_ROWS, WORLD_COLS, DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE
     )
+    place_items_in_cave()
     player_x = cx * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
     player_y = cy * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
     light_percentage = MAX_LIGHT
     energy_percentage = MAX_ENERGY
-    map_count = 0
     GAME_STATE = "PLAYING"
-
-def draw_howto():
-    screen.fill((30, 30, 30))
-    lines = [
-        "HOW TO PLAY:",
-        "- Arrow Keys: Move your character",
-        "- M or MAP button: Toggle map",
-        "- Light & Energy decrease over time",
-        "- Reach green exit to win",
-        "",
-        "Click anywhere to return to menu"
-    ]
-    for i, line in enumerate(lines):
-        txt = font.render(line, True, (255, 255, 255))
-        screen.blit(txt, (50, 50 + i*30))
+    map_unlocked = False
 
 # ======================
 # MAIN LOOP
@@ -352,39 +340,11 @@ while running:
                (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 GAME_STATE = "MENU"
 
-        elif GAME_STATE == "PLAYING":
-            # Toggle map with M key
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
-                if show_map:
-                    # Always allow closing the map
-                    show_map = False
-                elif map_count > 0:
-                    # Only open if player has a map
-                    show_map = True
-                    map_count -= 1
-
-            # Toggle map with mouse button
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if map_button.collidepoint(event.pos):
-                    if show_map:
-                        # Always allow closing
-                        show_map = False
-                    elif map_count > 0:
-                        # Only open if player has a map
-                        show_map = True
-                        map_count -= 1
-                elif not show_map and back_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
-
-
     # ----------------
-    # DRAWING & MOVEMENT
+    # UPDATE & DRAW
     # ----------------
     if GAME_STATE == "MENU":
         menu_buttons = draw_menu(mouse)
-
-    elif GAME_STATE == "HOWTO":
-        draw_howto()
 
     elif GAME_STATE == "PLAYING":
         keys = pygame.key.get_pressed()
@@ -407,47 +367,30 @@ while running:
         if can_move_pixel(player_x, player_y + dy):
             player_y += dy
 
-        if moving:
-            animation_timer += dt
-            if animation_timer >= ANIM_SPEED:
-                animation_timer = 0
-                animation_frame = (animation_frame + 1) % FRAMES
-        else:
-            animation_frame = 0
+        # Check item collection based on matrix
+        px = int(player_x // BASE_CELL_SIZE)
+        py = int(player_y // BASE_CELL_SIZE)
+        cell = cave[py][px]
+        if cell == 3:  # map
+            map_unlocked = True
+            show_map = True
+            cave[py][px] = 0
+        elif cell == 4:  # light/fire
+            light_percentage = min(MAX_LIGHT, light_percentage + 25)
+            cave[py][px] = 0
+        elif cell == 5:  # food
+            energy_percentage = min(MAX_ENERGY, energy_percentage + 25)
+            cave[py][px] = 0
 
-        # Decrease light and energy
         light_percentage = max(MIN_LIGHT, light_percentage - LIGHT_DRAIN_PER_SEC * dt)
         energy_percentage = max(MIN_ENERGY, energy_percentage - ENERGY_DRAIN_PER_SEC * dt)
 
-        # --------------------------
-        # ITEM COLLECTION LOGIC
-        # --------------------------
-        px_cell = int(player_x // BASE_CELL_SIZE)
-        py_cell = int(player_y // BASE_CELL_SIZE)
-
-        if cave[py_cell][px_cell] in (LIGHT, FOOD, MAP):
-            item = cave[py_cell][px_cell]
-            cave[py_cell][px_cell] = FLOOR  # Remove the item from the cave
-
-            if item == LIGHT:
-                light_percentage = min(MAX_LIGHT, light_percentage + 50)
-            elif item == FOOD:
-                energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
-            elif item == MAP:
-                map_count += 1  # Player can now open the map once
-
-        # Drawing
         screen.fill(BLACK)
-        if show_map:
-            draw_map(screen, cave,
-                     (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                     (SCREEN_WIDTH, SCREEN_HEIGHT))
-        else:
-            draw_world()
-            draw_light_overlay()
-            draw_bar(10, SCREEN_HEIGHT - 70, energy_percentage, "Energy", (100, 200, 255))
-            back_button = draw_back_button()
-
+        draw_world()
+        draw_light_overlay()
+        draw_bar(10, SCREEN_HEIGHT - 70, energy_percentage, "Energy", (100, 200, 255))
+        draw_bar(10, SCREEN_HEIGHT - 40, light_percentage, "Light", (240, 240, 100))
+        back_button = draw_back_button()
         map_button = draw_map_button()
 
     pygame.display.flip()
