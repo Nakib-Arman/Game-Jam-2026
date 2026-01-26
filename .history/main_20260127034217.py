@@ -645,7 +645,7 @@ while running:
                 # Trade MAP -> +10 Map Uses
                 elif trade_buttons["MAP"].collidepoint(event.pos) and inventory["MAP"] > 0:
                     inventory["MAP"] -= 1
-                    light_percentage = min(MAX_LIGHT, light_percentage + 50)
+                    light_percentage
                 
                 # Back to playing
                 elif trade_buttons["BACK"].collidepoint(event.pos):

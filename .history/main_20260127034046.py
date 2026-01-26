@@ -527,7 +527,7 @@ def draw_trade_menu(mouse):
     hover = rect_map.collidepoint(mouse)
     pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_map)
     pygame.draw.rect(screen, (200,200,200), rect_map, 2)
-    text = msg_font.render(f"MAPx1 ({inventory['MAP']}) ->  LIGHTx50%", True, (255,255,255))
+    text = msg_font.render(f"MAPx1 ({inventory['MAP']}) ->  LIGHTx50%({inventory['MAP']})", True, (255,255,255))
     screen.blit(text, text.get_rect(center=rect_map.center))
     buttons["MAP"] = rect_map
     
@@ -645,7 +645,7 @@ while running:
                 # Trade MAP -> +10 Map Uses
                 elif trade_buttons["MAP"].collidepoint(event.pos) and inventory["MAP"] > 0:
                     inventory["MAP"] -= 1
-                    light_percentage = min(MAX_LIGHT, light_percentage + 50)
+                    map_count += 10
                 
                 # Back to playing
                 elif trade_buttons["BACK"].collidepoint(event.pos):

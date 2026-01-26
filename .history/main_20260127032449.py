@@ -18,7 +18,7 @@ def set_level_from_index():
         WORLD_ROWS = 46
         WORLD_COLS = 50
         MAP_NUM = 3
-        FOOD_NUM = 80
+        FOOD_NUM = 8
         LIGHT_NUM = 8
         GATE_NUM = 10
         ENEMY_COUNT = 10
@@ -518,7 +518,7 @@ def draw_trade_menu(mouse):
     hover = rect_food.collidepoint(mouse)
     pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_food)
     pygame.draw.rect(screen, (200,200,200), rect_food, 2)
-    text = msg_font.render(f"Consume Food ({inventory['FOOD']})", True, (255,255,255))
+    text = msg_font.render(f"FOOD -> +50 Energy ({inventory['FOOD']})", True, (255,255,255))
     screen.blit(text, text.get_rect(center=rect_food.center))
     buttons["FOOD"] = rect_food
     
@@ -527,7 +527,7 @@ def draw_trade_menu(mouse):
     hover = rect_map.collidepoint(mouse)
     pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect_map)
     pygame.draw.rect(screen, (200,200,200), rect_map, 2)
-    text = msg_font.render(f"MAPx1 ({inventory['MAP']}) ->  LIGHTx50%", True, (255,255,255))
+    text = msg_font.render(f"MAP -> +10 Map Uses ({inventory['MAP']})", True, (255,255,255))
     screen.blit(text, text.get_rect(center=rect_map.center))
     buttons["MAP"] = rect_map
     
@@ -636,21 +636,16 @@ while running:
         elif GAME_STATE == "TRADE":
             trade_buttons = draw_trade_menu(mouse)
             
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # Trade FOOD -> Energy
-                if trade_buttons["FOOD"].collidepoint(event.pos) and inventory["FOOD"] > 0:
-                    inventory["FOOD"] -= 1
-                    energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
-                
-                # Trade MAP -> +10 Map Uses
-                elif trade_buttons["MAP"].collidepoint(event.pos) and inventory["MAP"] > 0:
-                    inventory["MAP"] -= 1
-                    light_percentage = min(MAX_LIGHT, light_percentage + 50)
-                
-                # Back to playing
-                elif trade_buttons["BACK"].collidepoint(event.pos):
-                    GAME_STATE = "PLAYING"
-
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if trade_buttons["FOOD"].collidepoint(event.pos) and inventory["FOOD"] > 0:
+                        inventory["FOOD"] -= 1
+                        energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
+                    elif trade_buttons["MAP"].collidepoint(event.pos) and inventory["MAP"] > 0:
+                        inventory["MAP"] -= 1
+                        map_count += 10
+                    elif trade_buttons["BACK"].collidepoint(event.pos):
+                        GAME_STATE = "PLAYING"
 
 
         elif GAME_STATE == "PLAYING":
