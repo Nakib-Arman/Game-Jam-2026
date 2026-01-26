@@ -1,6 +1,5 @@
 import pygame
 from cave import generate_cave
-from cave import rearrange_gates
 from map import draw_map
 
 # ======================
@@ -12,29 +11,26 @@ current_level_index = 0
 LEVEL = LEVELS[current_level_index]
 
 def set_level_from_index():
-    global LEVEL, WORLD_ROWS, WORLD_COLS, MAP_NUM, FOOD_NUM, LIGHT_NUM, GATE_NUM
+    global LEVEL, WORLD_ROWS, WORLD_COLS, MAP_NUM, FOOD_NUM, LIGHT_NUM
     LEVEL = LEVELS[current_level_index]
     if LEVEL == "easy":
         WORLD_ROWS = 46
         WORLD_COLS = 50
-        MAP_NUM = 30
+        MAP_NUM = 3
         FOOD_NUM = 8
         LIGHT_NUM = 8
-        GATE_NUM = 10
     elif LEVEL == "medium":
         WORLD_ROWS = 71
         WORLD_COLS = 75
         MAP_NUM = 6
         FOOD_NUM = 16
         LIGHT_NUM = 16
-        GATE_NUM = 20
     elif LEVEL == "hard":
         WORLD_ROWS = 96
         WORLD_COLS = 100
         MAP_NUM = 12
         FOOD_NUM = 32
         LIGHT_NUM = 32
-        GATE_NUM = 40
 
 set_level_from_index()
 
@@ -88,7 +84,7 @@ MAP = 3
 FOOD = 4
 LIGHT = 5
 GATE_CLOSED = 6
-GATE_OPEN = 7
+GATE_OPENED = 7
 
 # ======================
 # INIT
@@ -155,9 +151,6 @@ food_image = pygame.transform.scale(food_image, (BASE_CELL_SIZE // 2, BASE_CELL_
 light_image = pygame.image.load("assets/light.jpg")
 light_image = pygame.transform.scale(light_image, (BASE_CELL_SIZE // 2, BASE_CELL_SIZE // 2))
 
-finish_image = pygame.image.load("assets/finish.jpg")
-finish_image = pygame.transform.scale(finish_image, (BASE_CELL_SIZE, BASE_CELL_SIZE))
-
 # ======================
 # GAME STATE
 # ======================
@@ -190,7 +183,7 @@ def can_move_pixel(x, y):
             cy = int((y + oy) // BASE_CELL_SIZE)
             if not (0 <= cx < WORLD_COLS and 0 <= cy < WORLD_ROWS):
                 return False
-            if cave[cy][cx] in (WALL, GATE_CLOSED):
+            if cave[cy][cx]  WALL:
                 return False
     return True
 
@@ -267,12 +260,9 @@ def draw_world():
             # Draw walls
             if tile == WALL:
                 screen.blit(wall_image, (sx, sy))
-            elif tile == GATE_CLOSED:
-                pygame.draw.rect(screen, (200, 0, 0), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))  # red for closed gate
-            elif tile == GATE_OPEN:
-                pygame.draw.rect(screen, (0, 200, 0), (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))  # green for open gate
             elif tile==EXIT:
-                screen.blit(finish_image, (sx, sy))
+                pygame.draw.rect(screen, GREEN,
+                                 (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
             else:
                 pygame.draw.rect(screen, LIGHT_GRAY,
                                  (sx, sy, BASE_CELL_SIZE, BASE_CELL_SIZE))
@@ -450,7 +440,7 @@ def start_new_game():
     global light_percentage, energy_percentage, GAME_STATE
     set_level_from_index()
     cave, (cx, cy) = generate_cave(
-        WORLD_ROWS, WORLD_COLS, DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE, MAP_NUM, FOOD_NUM, LIGHT_NUM, GATE_NUM
+        WORLD_ROWS, WORLD_COLS, DENSITY, MIN_ROOM_SIZE, MAX_ROOM_SIZE, MAP_NUM, FOOD_NUM, LIGHT_NUM
     )
     player_x = cx * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
     player_y = cy * BASE_CELL_SIZE + BASE_CELL_SIZE // 2
@@ -526,27 +516,9 @@ while running:
                     # Always allow closing the map
                     show_map = False
                 elif map_count > 0:
+                    # Only open if player has a map
                     show_map = True
                     map_count -= 1
-
-                    # Toggle gates randomly when map is viewed
-                    exit_cell = None
-                    for y in range(WORLD_ROWS):
-                        for x in range(WORLD_COLS):
-                            if cave[y][x] == EXIT:
-                                exit_cell = (x, y)
-                                break
-                        if exit_cell:
-                            break
-
-                    if exit_cell:
-                        rearrange_gates(
-                            cave,
-                            (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                            exit_cell,
-                            open_ratio=0.5  # half open, half closed
-                        )
-
 
             # Toggle map with mouse button
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -558,26 +530,6 @@ while running:
                         # Only open if player has a map
                         show_map = True
                         map_count -= 1
-
-                        # Toggle gates randomly when map is viewed
-                        exit_cell = None
-                        for y in range(WORLD_ROWS):
-                            for x in range(WORLD_COLS):
-                                if cave[y][x] == EXIT:
-                                    exit_cell = (x, y)
-                                    break
-                            if exit_cell:
-                                break
-
-                        if exit_cell:
-                            for rows in cave:
-                                print(rows)
-                            rearrange_gates(
-                                cave,
-                                (int(player_x // BASE_CELL_SIZE), int(player_y // BASE_CELL_SIZE)),
-                                exit_cell,
-                                open_ratio=0.5  # half open, half closed
-                            )
                 elif not show_map and back_button.collidepoint(event.pos):
                     GAME_STATE = "MENU"
 
@@ -651,7 +603,7 @@ while running:
             elif item == FOOD:
                 energy_percentage = min(MAX_ENERGY, energy_percentage + 50)
             elif item == MAP:
-                map_count += 10  # Player can now open the map once
+                map_count += 1  # Player can now open the map once
                 
 
         # Drawing

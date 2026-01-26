@@ -26,8 +26,7 @@ def generate_cave(rows, cols,
                   max_room_size=6,
                   num_maps=5,           # number of maps to scatter
                   num_foods=10,         # number of foods to scatter
-                  num_lights=8,         # number of lights to scatter
-                  num_gates=6):         # total number of gates (half open, half closed)
+                  num_lights=8):        # number of lights to scatter
 
     cave = [[WALL for _ in range(cols)] for _ in range(rows)]
 
@@ -157,7 +156,7 @@ def generate_cave(rows, cols,
     # ----------------------
     # Place gates in narrow passages
     # ----------------------
-    place_gates(cave, spawn=(spawn_x, spawn_y), exit_pos=(exit_x, exit_y), total_gates=num_gates)
+    place_gates(cave, spawn=(spawn_x, spawn_y), exit_pos=(exit_x, exit_y))
 
     return cave, (spawn_x, spawn_y)
 
@@ -188,34 +187,22 @@ def find_farthest_cell(cave, start_x, start_y):
 # ----------------------
 # Gate placement
 # ----------------------
-def place_gates(cave, spawn, exit_pos, total_gates=6):
+def place_gates(cave, spawn, exit_pos, gate_chance=0.15):
     """
-    Place exactly total_gates in narrow corridors, half open, half closed.
+    Place gates in narrow corridors (1-tile wide) randomly.
     """
     rows, cols = len(cave), len(cave[0])
-    narrow_passages = []
-
-    # Identify narrow corridors
     for y in range(1, rows-1):
         for x in range(1, cols-1):
             if cave[y][x] != FLOOR:
                 continue
-            # Narrow horizontally or vertically
-            if (cave[y][x-1]==WALL and cave[y][x+1]==WALL) or (cave[y-1][x]==WALL and cave[y+1][x]==WALL):
-                narrow_passages.append((x,y))
 
-    random.shuffle(narrow_passages)
-    gates_to_place = min(total_gates, len(narrow_passages))
-    selected = narrow_passages[:gates_to_place]
+            # Narrow corridor check (exactly 2 floors adjacent)
+            adjacent = sum([cave[y+dy][x+dx]==FLOOR for dx, dy in [(0,1),(1,0),(0,-1),(-1,0)]])
+            if adjacent == 2 and random.random() < gate_chance:
+                cave[y][x] = GATE_CLOSED
 
-    half = gates_to_place // 2
-    for i, (x, y) in enumerate(selected):
-        if i < half:
-            cave[y][x] = GATE_CLOSED
-        else:
-            cave[y][x] = GATE_OPEN
-
-    # Ensure path from spawn to exit
+    # Ensure path from spawn to exit remains (open gates along path)
     open_path_between(cave, spawn, exit_pos)
 
 
@@ -233,7 +220,7 @@ def open_path_between(cave, start, end):
 
 def bfs_path(cave, start, end):
     """
-    BFS pathfinding from start to end avoiding walls.
+    Simple BFS pathfinding from start to end avoiding walls.
     Returns list of coordinates in path.
     """
     rows, cols = len(cave), len(cave[0])
@@ -269,14 +256,18 @@ def bfs_path(cave, start, end):
 # ----------------------
 def rearrange_gates(cave, spawn, exit_pos, open_ratio=0.5):
     """
-    Randomly toggle gates while keeping guaranteed path from spawn to exit.
+    Randomly toggle gates in the cave while keeping a guaranteed path from spawn to exit.
+    open_ratio: fraction of gates to keep open
     """
     gate_positions = [(x, y) for y, row in enumerate(cave) for x, cell in enumerate(row) if cell in (GATE_CLOSED, GATE_OPEN)]
+
+    # Shuffle and set gates
     random.shuffle(gate_positions)
     num_open = int(len(gate_positions) * open_ratio)
     for i, (x, y) in enumerate(gate_positions):
         cave[y][x] = GATE_OPEN if i < num_open else GATE_CLOSED
 
+    # Open gates along guaranteed path
     open_path_between(cave, spawn, exit_pos)
 
 
@@ -314,13 +305,12 @@ if __name__ == "__main__":
         cols=30,
         num_maps=3,
         num_foods=6,
-        num_lights=5,
-        num_gates=8       # <-- Number of gates input here
+        num_lights=5
     )
     exit_pos = find_farthest_cell(cave, spawn[0], spawn[1])
     print("Spawn:", spawn, "Exit:", exit_pos)
     print_cave(cave, spawn)
 
     print("\n--- Rearranging gates ---\n")
-    rearrange_gates(cave, spawn, exit_pos, open_ratio=0.5)
+    rearrange_gates(cave, spawn, exit_pos, open_ratio=0.4)
     print_cave(cave, spawn)
