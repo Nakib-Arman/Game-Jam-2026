@@ -132,16 +132,6 @@ wall_image = pygame.transform.scale(
     wall_image, (BASE_CELL_SIZE, BASE_CELL_SIZE)
 )
 
-map_btn_img = pygame.image.load("assets/buttons/map_btn.jpg").convert_alpha()
-trade_btn_img = pygame.image.load("assets/buttons/inventory.jpg").convert_alpha()
-back_btn_img = pygame.image.load("assets/buttons/back_btn.jpg").convert_alpha()
-
-# Optional: scale to fit the button size
-map_btn_img = pygame.transform.scale(map_btn_img, (80, 80))
-trade_btn_img = pygame.transform.scale(trade_btn_img, (80, 80))
-back_btn_img = pygame.transform.scale(back_btn_img, (80, 80))
-
-
 # ======================
 # SPRITES
 # ======================
@@ -211,11 +201,6 @@ monster_left = pygame.transform.scale(monster_left, (MONSTER_SIZE, MONSTER_SIZE)
 monster_right = pygame.image.load("assets/monright.jpg")
 monster_right = pygame.transform.scale(monster_right, (MONSTER_SIZE, MONSTER_SIZE))
 
-# Background
-menu_bg = pygame.image.load("assets/shadow_of_death_menu.png").convert()
-menu_bg = pygame.transform.scale(menu_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
-
 # ======================
 # GAME STATE
 # ======================
@@ -264,24 +249,20 @@ def get_camera_offset():
 # ======================
 
 def draw_map_button():
-    rect = pygame.Rect(SCREEN_WIDTH - 100, 10, 80, 80)
-
-    # Button frame (optional but recommended)
+    rect = pygame.Rect(SCREEN_WIDTH - 110, 10, 100, 40)
+    pygame.draw.rect(screen, (80, 80, 80), rect)
     pygame.draw.rect(screen, (200, 200, 200), rect, 2)
-
-    screen.blit(map_btn_img, rect.topleft)
+    text = font.render("MAP (M)", True, (255, 255, 255))
+    screen.blit(text, text.get_rect(center=rect.center))
     return rect
-
 
 def draw_trade_button():
-    rect = pygame.Rect(SCREEN_WIDTH - 190, 10, 80, 80)
-
-    # Button frame
+    rect = pygame.Rect(SCREEN_WIDTH - 110, 60, 100, 40)
+    pygame.draw.rect(screen, (80, 80, 80), rect)
     pygame.draw.rect(screen, (200, 200, 200), rect, 2)
-
-    screen.blit(trade_btn_img, rect.topleft)
+    text = font.render("TRADE", True, (255, 255, 255))
+    screen.blit(text, text.get_rect(center=rect.center))
     return rect
-
 
 
 def draw_bar(x, y, value, label, color):
@@ -293,12 +274,11 @@ def draw_bar(x, y, value, label, color):
     screen.blit(txt, (x + w + 10, y + 3))
 
 def draw_back_button():
-    rect = pygame.Rect(10, 10, 80, 80)
-
-    # Button frame
+    rect = pygame.Rect(10, 10, 120, 40)
+    pygame.draw.rect(screen, (80, 80, 80), rect)
     pygame.draw.rect(screen, (200, 200, 200), rect, 2)
-
-    screen.blit(back_btn_img, rect.topleft)
+    text = font.render("BACK", True, (255, 255, 255))
+    screen.blit(text, text.get_rect(center=rect.center))
     return rect
 
 # ======================
@@ -390,72 +370,38 @@ def draw_world():
 # ======================
 
 def draw_menu(mouse):
-    # ---------- FULL BACKGROUND IMAGE ----------
-    screen.blit(menu_bg, (0, 0))
+    screen.fill((20, 20, 20))
+    title = pygame.font.SysFont(None, 64).render(
+        "CAVE EXPLORER", True, (240, 240, 240)
+    )
+    screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, 120)))
 
-    # ---------- RIGHT PANEL ----------
-    panel_width = 420
-    panel_x = SCREEN_WIDTH - panel_width
-
-    # panel_surface = pygame.Surface((panel_width, SCREEN_HEIGHT))
-    # panel_surface.fill((25, 25, 25))
-    # panel_surface.set_alpha(240)  # Slight transparency
-    # screen.blit(panel_surface, (panel_x, 0))
-
-    # # ---------- GAME TITLE (on left side) ----------
-    # title_font = pygame.font.SysFont(None, 64)
-    # title = title_font.render("SHADOW OF DEATH", True, (240, 240, 240))
-    # screen.blit(title, (60, 80))  # Left side like artwork
-
-    # ---------- BUTTONS ----------
     buttons = {}
     w, h = 260, 60
-    start_y = 220
-    spacing = 80
+    y = 220
 
     labels = ["NEW GAME", "LEVEL", "HOW TO PLAY", "QUIT"]
-
     for i, label in enumerate(labels):
-        rect = pygame.Rect(
-            panel_x + panel_width // 2 - w // 2,
-            start_y + 120 + i * spacing,
-            w,
-            h
-        )
-
+        rect = pygame.Rect(SCREEN_WIDTH//2-w//2, y+i*80, w, h)
         hover = rect.collidepoint(mouse)
+        pygame.draw.rect(screen, (120,120,120) if hover else (80,80,80), rect)
+        pygame.draw.rect(screen, (200,200,200), rect, 2)
 
-        # ---------- BUTTON BACKGROUND ----------
-        base_color  = (120, 90, 30)
-        hover_color = (160, 120, 40)
-        color = hover_color if hover else base_color
-
-        # Shadow
-        shadow_rect = rect.copy()
-        shadow_rect.x += 3
-        shadow_rect.y += 3
-        pygame.draw.rect(screen, (0, 0, 0, 50), shadow_rect, border_radius=10)
-
-        # Main button
-        pygame.draw.rect(screen, color, rect, border_radius=10)
-
-        # Border
-        pygame.draw.rect(screen, (180, 180, 180), rect, 2, border_radius=10)
-
-        # ---------- BUTTON TEXT ----------
+        # For LEVEL, show current level
         if label == "LEVEL":
             text_label = f"LEVEL: {LEVEL.upper()}"
         else:
             text_label = label
 
-        text = font.render(text_label, True, (255, 255, 255))
-        text_rect = text.get_rect(center=rect.center)
-        screen.blit(text, text_rect)
-
+        screen.blit(font.render(text_label, True, (255,255,255)),
+                    font.render(text_label, True, (255,255,255)).get_rect(center=rect.center))
         buttons[label] = rect
-
     return buttons
 
+def draw_inventory():
+    x, y = 10, SCREEN_HEIGHT - 100
+    txt = font.render(f"Inventory: FOOD={inventory['FOOD']} MAP={inventory['MAP']}", True, (255, 255, 255))
+    screen.blit(txt, (x, y))
 
 
 def draw_win_screen():
@@ -574,7 +520,7 @@ def draw_game_over_screen():
 
 
 def draw_trade_window(mouse):
-    window_w, window_h = 420, 460
+    window_w, window_h = 420, 360
     window_x = SCREEN_WIDTH // 2 - window_w // 2
     window_y = SCREEN_HEIGHT // 2 - window_h // 2
 
@@ -590,39 +536,35 @@ def draw_trade_window(mouse):
 
 
     # ---------- INVENTORY DISPLAY ----------
-    food_icon = pygame.image.load("assets/food.jpg").convert_alpha()
-    map_icon  = pygame.image.load("assets/map.jpg").convert_alpha()
-
     inv_y = window_y + 70
-    icon_size = 64
+    icon_size = 32
     spacing = 120
-
     # Food
     food_icon_scaled = pygame.transform.scale(food_icon, (icon_size, icon_size))
-    food_x = SCREEN_WIDTH // 2 - spacing
+    food_x = SCREEN_WIDTH // 2 - spacing // 2
     screen.blit(food_icon_scaled, (food_x, inv_y))
     food_text = msg_font.render(f"x {inventory['FOOD']}", True, (255, 255, 255))
-    screen.blit(food_text, (food_x + icon_size + 8, inv_y + 20))
+    screen.blit(food_text, (food_x + icon_size + 8, inv_y + 6))
 
     # Map
     map_icon_scaled = pygame.transform.scale(map_icon, (icon_size, icon_size))
     map_x = SCREEN_WIDTH // 2 + spacing // 2
     screen.blit(map_icon_scaled, (map_x, inv_y))
     map_text = msg_font.render(f"x {inventory['MAP']}", True, (255, 255, 255))
-    screen.blit(map_text, (map_x + icon_size + 8, inv_y + 20))
+    screen.blit(map_text, (map_x + icon_size + 8, inv_y + 6))
 
     buttons = {}
-    y_start = window_y + 160
+    y_start = window_y + 70
     spacing = 45
     btn_w, btn_h = window_w - 40, 36
 
     options = [
-        ("FOOD_ENERGY", f"Consume Food → +50% Energy"),
-        ("FOOD_LIGHT",  f"Food → +50% Light"),
-        ("FOOD_MAP",    f"Food → Map"),
-        ("MAP_ENERGY",  f"Map → +50% Energy"),
-        ("MAP_LIGHT",   f"Map → +50% Light"),
-        ("BACK",        "Done")
+        ("FOOD_ENERGY", f"Consume Food → +50% Energy ({inventory['FOOD']})"),
+        ("FOOD_LIGHT",  f"Food x1 → +50% Light ({inventory['FOOD']})"),
+        ("FOOD_MAP",    f"Food x1 → Map x1 ({inventory['FOOD']}/{inventory['MAP']})"),
+        ("MAP_ENERGY",  f"Map x1 → +50% Energy ({inventory['MAP']})"),
+        ("MAP_LIGHT",   f"Map x1 → +50% Light ({inventory['MAP']})"),
+        ("BACK",        "Back")
     ]
 
     for i, (key, label) in enumerate(options):
@@ -673,124 +615,25 @@ def start_new_game():
     map_count = 0
     GAME_STATE = "PLAYING"
 
-font_title = pygame.font.SysFont(None, 64)
-font_text  = pygame.font.SysFont(None, 28)
-font_small = pygame.font.SysFont(None, 24)
-# How To Play text
-HOW_TO_PLAY_TEXT = [
-    "🎯 Objective",
-    "Navigate the cave and reach the exit safely. Collect resources, manage your energy and light, and avoid monsters while making strategic decisions about when to use or trade your items.",
-    "",
-    "🗺️ Collectible Items",
-    "Map - Adds a map to your inventory. Using a map rearranges the doors of the cave, creating new paths. Maps can also be traded for other items if needed.",
-    "Food - Restores 50% of your energy and speed when consumed. Can only be stored in inventory if your energy is above 50%. Food can also be traded for maps or light.",
-    "Light - Increases visibility, reducing darkness. More light attracts monsters, making navigation riskier. Light can be traded for food or maps.",
-    "",
-    "⚡ Player Stats",
-    "Energy - Decreases over time or due to actions. If energy drops, movement speed decreases. Consuming food restores energy and boosts speed temporarily.",
-    "Speed - Linked to energy level. Higher energy = faster movement. Boosted temporarily by consuming food.",
-    "Light - Controls visibility. Lower light increases darkness. Attracting monsters happens when light is high.",
-    "",
-    "💱 Trading Items",
-    "Items collected (Food, Maps, Light) can be traded. Trade wisely, since every item has an equivalent debt or cost.",
-    "Example trades: Map → Energy or Light, Food → Energy, Light, or Map.",
-    "",
-    "🐉 Enemies",
-    "Monsters appear in the cave, especially near areas with high light. Avoid them by managing your light carefully.",
-    "",
-    "⚠️ Tips",
-    "Plan your path: using maps can make paths easier but rearranges doors.",
-    "Monitor energy and speed: running out of energy slows you down dangerously.",
-    "Balance light: too little makes navigation hard; too much attracts monsters.",
-    "Use trades smartly: inventory management can save your life.",
-    "",
-    "🏁 Winning the Game",
-    "Reach the exit while maintaining enough energy and avoiding monsters. Efficient use of items combined with smart trading is the key to survival."
-]
-
-# ---------- GLOBALS FOR SCROLL ----------
-how_to_scroll = 0  # current scroll offset
-scroll_speed = 40  # pixels per scroll
-max_scroll = 0     # calculated dynamically
-
-def draw_how_to_play(mouse, scroll_delta=0):
-    global how_to_scroll, max_scroll
-
-    screen.fill((20, 20, 20))  # dark background
-
-    # ---------- PANEL ----------
-    panel_width = 1000
-    panel_height = SCREEN_HEIGHT - 100
-    panel_x = (SCREEN_WIDTH - panel_width) // 2
-    panel_y = 50
-    panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
-    pygame.draw.rect(screen, (35, 35, 35), panel_rect)
-    pygame.draw.rect(screen, (180, 180, 180), panel_rect, 2)
-
-    # ---------- TITLE ----------
-    title_surf = font_title.render("HOW TO PLAY", True, (240, 240, 240))
-    screen.blit(title_surf, title_surf.get_rect(center=(SCREEN_WIDTH // 2, 90)))
-
-    # ---------- SCROLL ----------
-    how_to_scroll += scroll_delta * scroll_speed
-    # limit will be calculated later after measuring total text height
-
-    # ---------- TEXT ----------
-    y_offset = panel_y + 50 + how_to_scroll
-    line_spacing = 28
-    max_text_width = panel_width - 40
-
-    total_text_height = 0
-
-    for line in HOW_TO_PLAY_TEXT:
-        # wrap long lines
-        words = line.split(' ')
-        current_line = ""
-        for word in words:
-            test_line = current_line + word + " "
-            test_surf = font_text.render(test_line, True, (255, 255, 255))
-            if test_surf.get_width() > max_text_width:
-                screen.blit(font_text.render(current_line, True, (255, 255, 255)), (panel_x + 20, y_offset))
-                y_offset += line_spacing
-                total_text_height += line_spacing
-                current_line = word + " "
-            else:
-                current_line = test_line
-        if current_line.strip() != "":
-            screen.blit(font_text.render(current_line, True, (255, 255, 255)), (panel_x + 20, y_offset))
-            y_offset += line_spacing
-            total_text_height += line_spacing
-
-    # ---------- CALCULATE MAX SCROLL ----------
-    # Make sure the last line is not below the bottom of the panel
-    bottom_padding = 20
-    visible_text_height = panel_height - 50  # space below title
-    if total_text_height > visible_text_height:
-        max_scroll = visible_text_height - total_text_height - bottom_padding
-    else:
-        max_scroll = 0  # text fits, no scroll needed
-
-    # clamp scroll
-    how_to_scroll = max(min(how_to_scroll, 0), max_scroll)
-
-    # ---------- BACK BUTTON ----------
-    btn_w, btn_h = 150, 50
-    btn_rect = pygame.Rect(SCREEN_WIDTH // 2 - btn_w // 2, SCREEN_HEIGHT - 70, btn_w, btn_h)
-    hover = btn_rect.collidepoint(mouse)
-    pygame.draw.rect(screen, (110, 110, 110) if hover else (70, 70, 70), btn_rect, border_radius=8)
-    pygame.draw.rect(screen, (180, 180, 180), btn_rect, 2, border_radius=8)
-    text_btn = font_small.render("BACK", True, (255, 255, 255))
-    screen.blit(text_btn, text_btn.get_rect(center=btn_rect.center))
-
-    return btn_rect
-
-
+def draw_howto():
+    screen.fill((30, 30, 30))
+    lines = [
+        "HOW TO PLAY:",
+        "- Arrow Keys: Move your character",
+        "- M or MAP button: Toggle map",
+        "- Light & Energy decrease over time",
+        "- Reach green exit to win",
+        "",
+        "Click anywhere to return to menu"
+    ]
+    for i, line in enumerate(lines):
+        txt = font.render(line, True, (255, 255, 255))
+        screen.blit(txt, (50, 50 + i*30))
 
 # ======================
 # MAIN LOOP
 # ======================
 
-scroll_y=0
 running = True
 while running:
     dt = clock.tick(FPS) / 1000
@@ -813,13 +656,9 @@ while running:
                     running = False
 
         elif GAME_STATE == "HOWTO":
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 4:  # scroll up
-                    draw_how_to_play(pygame.mouse.get_pos(), scroll_delta=1)
-                elif event.button == 5:  # scroll down
-                    draw_how_to_play(pygame.mouse.get_pos(), scroll_delta=-1)
-                elif back_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
+            if event.type == pygame.MOUSEBUTTONDOWN or \
+               (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                GAME_STATE = "MENU"
 
         elif GAME_STATE == "WIN":
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -939,7 +778,7 @@ while running:
         menu_buttons = draw_menu(mouse)
 
     elif GAME_STATE == "HOWTO":
-        back_button = draw_how_to_play(mouse, scroll_y)
+        draw_howto()
 
     elif GAME_STATE == "WIN":
         win_new_game_button, win_menu_button = draw_win_screen()
@@ -1022,7 +861,7 @@ while running:
         else:
             draw_world()
             draw_light_overlay()
-            draw_bar(10, SCREEN_HEIGHT - 70, energy_percentage, "Energy", (255, 120, 120))
+            draw_bar(10, SCREEN_HEIGHT - 70, energy_percentage, "Energy", (100, 200, 255))
             back_button = draw_back_button()
 
         # --------------------------
@@ -1057,6 +896,7 @@ while running:
 
         map_button = draw_map_button()
         trade_button = draw_trade_button()
+        draw_inventory()
 
     pygame.display.flip()
 

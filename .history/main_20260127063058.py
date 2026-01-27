@@ -819,7 +819,7 @@ while running:
                 elif event.button == 5:  # scroll down
                     draw_how_to_play(pygame.mouse.get_pos(), scroll_delta=-1)
                 elif back_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
+                    GAME_STATE = ""
 
         elif GAME_STATE == "WIN":
             if event.type == pygame.MOUSEBUTTONDOWN:

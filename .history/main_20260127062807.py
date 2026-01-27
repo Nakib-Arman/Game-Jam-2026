@@ -708,14 +708,7 @@ HOW_TO_PLAY_TEXT = [
     "Reach the exit while maintaining enough energy and avoiding monsters. Efficient use of items combined with smart trading is the key to survival."
 ]
 
-# ---------- GLOBALS FOR SCROLL ----------
-how_to_scroll = 0  # current scroll offset
-scroll_speed = 40  # pixels per scroll
-max_scroll = 0     # calculated dynamically
-
-def draw_how_to_play(mouse, scroll_delta=0):
-    global how_to_scroll, max_scroll
-
+def draw_how_to_play(mouse, scroll_y=0):
     screen.fill((20, 20, 20))  # dark background
 
     # ---------- PANEL ----------
@@ -731,19 +724,13 @@ def draw_how_to_play(mouse, scroll_delta=0):
     title_surf = font_title.render("HOW TO PLAY", True, (240, 240, 240))
     screen.blit(title_surf, title_surf.get_rect(center=(SCREEN_WIDTH // 2, 90)))
 
-    # ---------- SCROLL ----------
-    how_to_scroll += scroll_delta * scroll_speed
-    # limit will be calculated later after measuring total text height
-
     # ---------- TEXT ----------
-    y_offset = panel_y + 50 + how_to_scroll
+    y_offset = panel_y + 50 + scroll_y  # start below title
     line_spacing = 28
-    max_text_width = panel_width - 40
-
-    total_text_height = 0
+    max_text_width = panel_width - 40  # padding inside panel
 
     for line in HOW_TO_PLAY_TEXT:
-        # wrap long lines
+        # Handle basic wrapping for long lines
         words = line.split(' ')
         current_line = ""
         for word in words:
@@ -752,26 +739,12 @@ def draw_how_to_play(mouse, scroll_delta=0):
             if test_surf.get_width() > max_text_width:
                 screen.blit(font_text.render(current_line, True, (255, 255, 255)), (panel_x + 20, y_offset))
                 y_offset += line_spacing
-                total_text_height += line_spacing
                 current_line = word + " "
             else:
                 current_line = test_line
         if current_line.strip() != "":
             screen.blit(font_text.render(current_line, True, (255, 255, 255)), (panel_x + 20, y_offset))
             y_offset += line_spacing
-            total_text_height += line_spacing
-
-    # ---------- CALCULATE MAX SCROLL ----------
-    # Make sure the last line is not below the bottom of the panel
-    bottom_padding = 20
-    visible_text_height = panel_height - 50  # space below title
-    if total_text_height > visible_text_height:
-        max_scroll = visible_text_height - total_text_height - bottom_padding
-    else:
-        max_scroll = 0  # text fits, no scroll needed
-
-    # clamp scroll
-    how_to_scroll = max(min(how_to_scroll, 0), max_scroll)
 
     # ---------- BACK BUTTON ----------
     btn_w, btn_h = 150, 50
@@ -783,8 +756,6 @@ def draw_how_to_play(mouse, scroll_delta=0):
     screen.blit(text_btn, text_btn.get_rect(center=btn_rect.center))
 
     return btn_rect
-
-
 
 # ======================
 # MAIN LOOP
@@ -813,13 +784,9 @@ while running:
                     running = False
 
         elif GAME_STATE == "HOWTO":
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 4:  # scroll up
-                    draw_how_to_play(pygame.mouse.get_pos(), scroll_delta=1)
-                elif event.button == 5:  # scroll down
-                    draw_how_to_play(pygame.mouse.get_pos(), scroll_delta=-1)
-                elif back_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
+            if event.type == pygame.MOUSEBUTTONDOWN or \
+               (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                GAME_STATE = "MENU"
 
         elif GAME_STATE == "WIN":
             if event.type == pygame.MOUSEBUTTONDOWN:

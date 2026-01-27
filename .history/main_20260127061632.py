@@ -673,124 +673,109 @@ def start_new_game():
     map_count = 0
     GAME_STATE = "PLAYING"
 
-font_title = pygame.font.SysFont(None, 64)
-font_text  = pygame.font.SysFont(None, 28)
-font_small = pygame.font.SysFont(None, 24)
-# How To Play text
-HOW_TO_PLAY_TEXT = [
-    "🎯 Objective",
-    "Navigate the cave and reach the exit safely. Collect resources, manage your energy and light, and avoid monsters while making strategic decisions about when to use or trade your items.",
-    "",
-    "🗺️ Collectible Items",
-    "Map - Adds a map to your inventory. Using a map rearranges the doors of the cave, creating new paths. Maps can also be traded for other items if needed.",
-    "Food - Restores 50% of your energy and speed when consumed. Can only be stored in inventory if your energy is above 50%. Food can also be traded for maps or light.",
-    "Light - Increases visibility, reducing darkness. More light attracts monsters, making navigation riskier. Light can be traded for food or maps.",
-    "",
-    "⚡ Player Stats",
-    "Energy - Decreases over time or due to actions. If energy drops, movement speed decreases. Consuming food restores energy and boosts speed temporarily.",
-    "Speed - Linked to energy level. Higher energy = faster movement. Boosted temporarily by consuming food.",
-    "Light - Controls visibility. Lower light increases darkness. Attracting monsters happens when light is high.",
-    "",
-    "💱 Trading Items",
-    "Items collected (Food, Maps, Light) can be traded. Trade wisely, since every item has an equivalent debt or cost.",
-    "Example trades: Map → Energy or Light, Food → Energy, Light, or Map.",
-    "",
-    "🐉 Enemies",
-    "Monsters appear in the cave, especially near areas with high light. Avoid them by managing your light carefully.",
-    "",
-    "⚠️ Tips",
-    "Plan your path: using maps can make paths easier but rearranges doors.",
-    "Monitor energy and speed: running out of energy slows you down dangerously.",
-    "Balance light: too little makes navigation hard; too much attracts monsters.",
-    "Use trades smartly: inventory management can save your life.",
-    "",
-    "🏁 Winning the Game",
-    "Reach the exit while maintaining enough energy and avoiding monsters. Efficient use of items combined with smart trading is the key to survival."
-]
+def draw_howto():
+    screen.fill((30, 30, 30))
+    lines = [
+        🎯 Objective
 
-# ---------- GLOBALS FOR SCROLL ----------
-how_to_scroll = 0  # current scroll offset
-scroll_speed = 40  # pixels per scroll
-max_scroll = 0     # calculated dynamically
+"            Navigate the cave and reach the exit safely. Collect resources, manage your energy and light, and avoid monsters while making strategic decisions about when to use or trade your items.
 
-def draw_how_to_play(mouse, scroll_delta=0):
-    global how_to_scroll, max_scroll
+            🗺️ Collectible Items
 
-    screen.fill((20, 20, 20))  # dark background
+            Map
 
-    # ---------- PANEL ----------
-    panel_width = 1000
-    panel_height = SCREEN_HEIGHT - 100
-    panel_x = (SCREEN_WIDTH - panel_width) // 2
-    panel_y = 50
-    panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
-    pygame.draw.rect(screen, (35, 35, 35), panel_rect)
-    pygame.draw.rect(screen, (180, 180, 180), panel_rect, 2)
+            Adds a map to your inventory.
 
-    # ---------- TITLE ----------
-    title_surf = font_title.render("HOW TO PLAY", True, (240, 240, 240))
-    screen.blit(title_surf, title_surf.get_rect(center=(SCREEN_WIDTH // 2, 90)))
+            Using a map rearranges the doors of the cave, creating new paths.
 
-    # ---------- SCROLL ----------
-    how_to_scroll += scroll_delta * scroll_speed
-    # limit will be calculated later after measuring total text height
+            Maps can also be traded for other items if needed.
 
-    # ---------- TEXT ----------
-    y_offset = panel_y + 50 + how_to_scroll
-    line_spacing = 28
-    max_text_width = panel_width - 40
+            Food
 
-    total_text_height = 0
+            Restores 50% of your energy and speed when consumed.
 
-    for line in HOW_TO_PLAY_TEXT:
-        # wrap long lines
-        words = line.split(' ')
-        current_line = ""
-        for word in words:
-            test_line = current_line + word + " "
-            test_surf = font_text.render(test_line, True, (255, 255, 255))
-            if test_surf.get_width() > max_text_width:
-                screen.blit(font_text.render(current_line, True, (255, 255, 255)), (panel_x + 20, y_offset))
-                y_offset += line_spacing
-                total_text_height += line_spacing
-                current_line = word + " "
-            else:
-                current_line = test_line
-        if current_line.strip() != "":
-            screen.blit(font_text.render(current_line, True, (255, 255, 255)), (panel_x + 20, y_offset))
-            y_offset += line_spacing
-            total_text_height += line_spacing
+            Can only be stored in inventory if your energy is above 50%.
 
-    # ---------- CALCULATE MAX SCROLL ----------
-    # Make sure the last line is not below the bottom of the panel
-    bottom_padding = 20
-    visible_text_height = panel_height - 50  # space below title
-    if total_text_height > visible_text_height:
-        max_scroll = visible_text_height - total_text_height - bottom_padding
-    else:
-        max_scroll = 0  # text fits, no scroll needed
+            Food can also be traded for maps or light.
 
-    # clamp scroll
-    how_to_scroll = max(min(how_to_scroll, 0), max_scroll)
+            Light
 
-    # ---------- BACK BUTTON ----------
-    btn_w, btn_h = 150, 50
-    btn_rect = pygame.Rect(SCREEN_WIDTH // 2 - btn_w // 2, SCREEN_HEIGHT - 70, btn_w, btn_h)
-    hover = btn_rect.collidepoint(mouse)
-    pygame.draw.rect(screen, (110, 110, 110) if hover else (70, 70, 70), btn_rect, border_radius=8)
-    pygame.draw.rect(screen, (180, 180, 180), btn_rect, 2, border_radius=8)
-    text_btn = font_small.render("BACK", True, (255, 255, 255))
-    screen.blit(text_btn, text_btn.get_rect(center=btn_rect.center))
+            Increases visibility, reducing darkness.
 
-    return btn_rect
+            More light attracts monsters, making navigation riskier.
 
+            Light can be traded for food or maps.
 
+            ⚡ Player Stats
+
+            Energy
+
+            Decreases over time or due to actions.
+
+            If energy drops, your movement speed decreases, making it harder to escape monsters.
+
+            Consuming food restores energy and boosts speed temporarily.
+
+            Speed
+
+            Linked to energy level.
+
+            Higher energy = faster movement.
+
+            Boosted temporarily by consuming food.
+
+            Light
+
+            Controls visibility.
+
+            Lower light increases darkness, making navigation more dangerous.
+
+            Attracting monsters happens when light is high.
+
+            💱 Trading Items
+
+            Items collected in the cave (Food, Maps, Light) can be traded.
+
+            Trade wisely, since every item has an equivalent debt or cost.
+
+            Example trades:
+
+            Map → Energy or Light
+
+            Food → Energy, Light, or Map
+
+            Strategy is key: trading too much or too little can impact survival.
+
+            🐉 Enemies
+
+            Monsters appear in the cave, especially near areas with high light.
+
+            Avoid them by managing your light carefully and moving strategically.
+
+            ⚠️ Tips
+
+            Plan your path: using maps can make paths easier but rearranges doors.
+
+            Monitor energy and speed: running out of energy slows you down dangerously.
+
+            Balance light: too little makes navigation hard; too much attracts monsters.
+
+            Use trades smartly: inventory management can save your life.
+
+            🏁 Winning the Game
+
+            Reach the exit of the cave while maintaining enough energy and avoiding monsters.
+
+            E"fficient use of food, maps, and light, combined with smart trading, is the key to survival.
+    ]
+    for i, line in enumerate(lines):
+        txt = font.render(line, True, (255, 255, 255))
+        screen.blit(txt, (50, 50 + i*30))
 
 # ======================
 # MAIN LOOP
 # ======================
 
-scroll_y=0
 running = True
 while running:
     dt = clock.tick(FPS) / 1000
@@ -813,13 +798,9 @@ while running:
                     running = False
 
         elif GAME_STATE == "HOWTO":
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 4:  # scroll up
-                    draw_how_to_play(pygame.mouse.get_pos(), scroll_delta=1)
-                elif event.button == 5:  # scroll down
-                    draw_how_to_play(pygame.mouse.get_pos(), scroll_delta=-1)
-                elif back_button.collidepoint(event.pos):
-                    GAME_STATE = "MENU"
+            if event.type == pygame.MOUSEBUTTONDOWN or \
+               (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                GAME_STATE = "MENU"
 
         elif GAME_STATE == "WIN":
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -939,7 +920,7 @@ while running:
         menu_buttons = draw_menu(mouse)
 
     elif GAME_STATE == "HOWTO":
-        back_button = draw_how_to_play(mouse, scroll_y)
+        draw_howto()
 
     elif GAME_STATE == "WIN":
         win_new_game_button, win_menu_button = draw_win_screen()
