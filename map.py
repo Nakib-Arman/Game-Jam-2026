@@ -89,3 +89,37 @@ def draw_map(screen, cave, player_pos, screen_size):
         ),
         2
     )
+
+    # Draw legend
+    legend_x = offset_x + cols * cell_size + 20
+    legend_y = offset_y
+    draw_map_legend(screen, legend_x, legend_y)
+
+
+
+def draw_map_legend(screen, start_x, start_y):
+    font = pygame.font.SysFont(None, 22)
+    spacing = 26
+
+    legend_items = [
+        ("Wall", (60, 35, 20)),
+        ("Floor", (120, 120, 120)),
+        ("Exit", (0, 200, 0)),
+        ("Closed Gate", (0, 0, 0)),
+        ("Open Gate", (255, 255, 255)),
+        ("Map", (0, 150, 255)),
+        ("Food", (255, 100, 0)),
+        ("Light", (255, 255, 50)),
+        ("Player", (220, 60, 60)),
+    ]
+
+    for i, (label, color) in enumerate(legend_items):
+        y = start_y + i * spacing
+
+        # color box
+        pygame.draw.rect(screen, color, (start_x, y, 18, 18))
+        pygame.draw.rect(screen, (200, 200, 200), (start_x, y, 18, 18), 1)
+
+        # text
+        text = font.render(label, True, (220, 220, 220))
+        screen.blit(text, (start_x + 26, y - 2))
